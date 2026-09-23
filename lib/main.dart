@@ -7,6 +7,28 @@ void main() {
   runApp(const MyApp());
 }
 
+// ===== Function Reusable: Kartu Statistik =====
+Widget buildStatCard(String value, String label, IconData icon) {
+  return Expanded(
+    child: Card(
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          children: [
+            Icon(icon),
+            const SizedBox(height: 6),
+            Text(
+              value,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
+            Text(label),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -56,20 +78,13 @@ class MyApp extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 24),
-              // Container dengan BoxDecoration
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.blue.shade200),
-                ),
-                child: const Text(
-                  'Pendidikan Teknik Informatika',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 14),
-                ),
+              // ===== Panggil function 3 kali dengan data berbeda =====
+              Row(
+                children: [
+                  buildStatCard('8', 'Widget', Icons.widgets),
+                  buildStatCard('4', 'Layout', Icons.view_quilt),
+                  buildStatCard('1', 'State', Icons.sync),
+                ],
               ),
             ],
           ),
