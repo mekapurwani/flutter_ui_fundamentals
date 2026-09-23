@@ -29,6 +29,66 @@ Widget buildStatCard(String value, String label, IconData icon) {
   );
 }
 
+// ===== StatefulWidget: GreetingCard =====
+class GreetingCard extends StatefulWidget {
+  const GreetingCard({super.key});
+
+  @override
+  State<GreetingCard> createState() => _GreetingCardState();
+}
+
+class _GreetingCardState extends State<GreetingCard> {
+  final TextEditingController controller = TextEditingController();
+  String message = 'Belum ada pesan';
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            Text(
+              '$studentId - $studentName',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: controller,
+              decoration: const InputDecoration(
+                labelText: 'Tulis pesan',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 8),
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  message = controller.text.trim().isEmpty
+                      ? 'Input masih kosong'
+                      : controller.text.trim();
+                });
+              },
+              child: const Text('Tampilkan'),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Pesan: $message',
+              style: const TextStyle(fontStyle: FontStyle.italic),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -40,53 +100,57 @@ class MyApp extends StatelessWidget {
         appBar: AppBar(
           title: const Text('Flutter UI Fundamentals'),
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Kartu identitas mahasiswa
-              Card(
-                elevation: 4,
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      CircleAvatar(
-                        radius: 46,
-                        backgroundImage:
-                            AssetImage('assets/images/profile.jpg'),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        studentName,
-                        style: const TextStyle(
-                            fontSize: 22, fontWeight: FontWeight.bold),
-                      ),
-                      Text(studentId),
-                      const SizedBox(height: 8),
-                      const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.phone_android),
-                          SizedBox(width: 8),
-                          Text('Mobile Programming Student'),
-                        ],
-                      ),
-                    ],
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                // Kartu identitas mahasiswa
+                Card(
+                  elevation: 4,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        CircleAvatar(
+                          radius: 46,
+                          backgroundImage:
+                              AssetImage('assets/images/profile.jpg'),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          studentName,
+                          style: const TextStyle(
+                              fontSize: 22, fontWeight: FontWeight.bold),
+                        ),
+                        Text(studentId),
+                        const SizedBox(height: 8),
+                        const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.phone_android),
+                            SizedBox(width: 8),
+                            Text('Mobile Programming Student'),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 24),
-              // ===== Panggil function 3 kali dengan data berbeda =====
-              Row(
-                children: [
-                  buildStatCard('8', 'Widget', Icons.widgets),
-                  buildStatCard('4', 'Layout', Icons.view_quilt),
-                  buildStatCard('1', 'State', Icons.sync),
-                ],
-              ),
-            ],
+                const SizedBox(height: 24),
+                // Baris statistik
+                Row(
+                  children: [
+                    buildStatCard('8', 'Widget', Icons.widgets),
+                    buildStatCard('4', 'Layout', Icons.view_quilt),
+                    buildStatCard('1', 'State', Icons.sync),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                // ===== StatefulWidget: GreetingCard =====
+                const GreetingCard(),
+              ],
+            ),
           ),
         ),
       ),
