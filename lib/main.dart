@@ -11,7 +11,7 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
- Widget build(BuildContext context) {
+  Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
@@ -21,21 +21,31 @@ class MyApp extends StatelessWidget {
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
+              // Step 3: Foto profil
+              CircleAvatar(
+                radius: 46,
+                backgroundImage: AssetImage('assets/images/profile.jpg'),
+              ),
+              const SizedBox(height: 12),
+              // Step 1: Nama (tebal)
               Text(
-                '$studentId - $studentName',
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 20),
+                studentName,
+                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 12),
-              const Text(
-                'Belajar Widget Tree',
-                style: TextStyle(fontSize: 16),
+              // Step 1: NIM
+              Text(studentId),
+              const SizedBox(height: 8),
+              // Step 2: Icon + deskripsi
+              const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.phone_android),
+                  SizedBox(width: 8),
+                  Text('Mobile Programming Student'),
+                ],
               ),
-              const SizedBox(height: 12),
-              const Icon(Icons.widgets, size: 48),
             ],
           ),
         ),
