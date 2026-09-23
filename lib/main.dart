@@ -15,96 +15,18 @@ final List<Map<String, dynamic>> topics = [
   {'title': '$studentId - $studentName', 'subtitle': 'Pemilik aplikasi', 'done': false},
 ];
 
-// ===== Function Reusable =====
-Widget buildStatCard(String value, String label, IconData icon) {
-  return Expanded(
-    child: Card(
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          children: [
-            Icon(icon),
-            const SizedBox(height: 6),
-            Text(
-              value,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-            ),
-            Text(label),
-          ],
-        ),
-      ),
-    ),
-  );
-}
-
-// ===== StatefulWidget: GreetingCard =====
-class GreetingCard extends StatefulWidget {
-  const GreetingCard({super.key});
-
-  @override
-  State<GreetingCard> createState() => _GreetingCardState();
-}
-
-class _GreetingCardState extends State<GreetingCard> {
-  final TextEditingController controller = TextEditingController();
-  String message = 'Belum ada pesan';
-
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Text(
-              '$studentId - $studentName',
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: controller,
-              decoration: const InputDecoration(
-                labelText: 'Tulis pesan',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 8),
-            ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  message = controller.text.trim().isEmpty
-                      ? 'Input masih kosong'
-                      : controller.text.trim();
-                });
-              },
-              child: const Text('Tampilkan'),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Pesan: $message',
-              style: const TextStyle(fontStyle: FontStyle.italic),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 // ===== Halaman List Topics =====
 class TopicsPage extends StatelessWidget {
   const TopicsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Hitung jumlah topik yang selesai
+    final int completed = topics.where((item) => item['done'] == true).length;
+
     return Column(
       children: [
+        // Identitas Mahasiswa
         Padding(
           padding: const EdgeInsets.all(12),
           child: Text(
@@ -112,20 +34,39 @@ class TopicsPage extends StatelessWidget {
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
         ),
+        // Ringkasan
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: Text(
+            '$completed dari ${topics.length} topik selesai',
+            style: const TextStyle(fontSize: 14, color: Colors.grey),
+          ),
+        ),
+        const SizedBox(height: 8),
+        // List dengan Card
         Expanded(
           child: ListView.builder(
             itemCount: topics.length,
             itemBuilder: (context, index) {
               final item = topics[index];
-              return ListTile(
-                leading: Icon(
-                  item['done'] == true
-                      ? Icons.check_circle
-                      : Icons.circle_outlined,
-                  color: item['done'] == true ? Colors.green : Colors.grey,
+              final bool isDone = item['done'] == true;
+              return Card(
+                margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                child: ListTile(
+                  leading: Icon(
+                    isDone ? Icons.check_circle : Icons.schedule,
+                    color: isDone ? Colors.green : Colors.orange,
+                  ),
+                  title: Text(item['title'] as String),
+                  subtitle: Text(item['subtitle'] as String),
+                  trailing: Text(
+                    isDone ? 'Selesai' : 'Belum',
+                    style: TextStyle(
+                      color: isDone ? Colors.green : Colors.orange,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
-                title: Text(item['title'] as String),
-                subtitle: Text(item['subtitle'] as String),
               );
             },
           ),
@@ -146,7 +87,7 @@ class MyApp extends StatelessWidget {
         appBar: AppBar(
           title: const Text('Flutter UI Fundamentals'),
         ),
-        body: TopicsPage(),
+        body: const TopicsPage(),
       ),
     );
   }
