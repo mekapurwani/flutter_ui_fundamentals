@@ -17,6 +17,77 @@ Future<Map<String, dynamic>> loadStudentData() async {
   return jsonDecode(jsonString) as Map<String, dynamic>;
 }
 
+// ===== StatefulWidget dengan FutureBuilder =====
+class DashboardPage extends StatefulWidget {
+  const DashboardPage({super.key});
+
+  @override
+  State<DashboardPage> createState() => _DashboardPageState();
+}
+
+class _DashboardPageState extends State<DashboardPage> {
+  late Future<Map<String, dynamic>> studentFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    studentFuture = loadStudentData();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Learning Dashboard'),
+      ),
+      body: FutureBuilder<Map<String, dynamic>>(
+        future: studentFuture,
+        builder: (context, snapshot) {
+          // Loading state
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          // Error state
+          if (snapshot.hasError) {
+            return Center(child: Text('Gagal memuat data: ${snapshot.error}'));
+          }
+          // Data state
+          final data = snapshot.data!;
+          final student = data['student'] as Map<String, dynamic>;
+          final courses = data['courses'] as List<dynamic>;
+
+          return Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: ListTile(
+                  leading: const CircleAvatar(child: Icon(Icons.person)),
+                  title: Text(student['name'] as String),
+                  subtitle: Text(student['nim'] as String),
+                ),
+              ),
+              const Divider(),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: courses.length,
+                  itemBuilder: (context, index) {
+                    final course = courses[index] as Map<String, dynamic>;
+                    return ListTile(
+                      leading: const Icon(Icons.book),
+                      title: Text(course['title'] as String),
+                      subtitle: Text(course['code'] as String),
+                    );
+                  },
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -24,33 +95,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Flutter UI Fundamentals'),
-        ),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                '$studentId - $studentName',
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 12),
-              ElevatedButton(
-                onPressed: () async {
-                  final data = await loadStudentData();
-                  debugPrint('=== Data dari JSON ===');
-                  debugPrint('Student: ${data['student']}');
-                  debugPrint('Jumlah courses: ${(data['courses'] as List).length}');
-                  debugPrint('Course pertama: ${data['courses'][0]}');
-                },
-                child: const Text('Test Baca JSON'),
-              ),
-            ],
-          ),
-        ),
-      ),
+      home: const DashboardPage(),
     );
   }
 }
