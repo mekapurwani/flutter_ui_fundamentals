@@ -23,27 +23,47 @@ class MyApp extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Step 3: Foto profil
               CircleAvatar(
                 radius: 46,
                 backgroundImage: AssetImage('assets/images/profile.jpg'),
               ),
               const SizedBox(height: 12),
-              // Step 1: Nama (tebal)
               Text(
                 studentName,
                 style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
-              // Step 1: NIM
               Text(studentId),
               const SizedBox(height: 8),
-              // Step 2: Icon + deskripsi
               const Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(Icons.phone_android),
                   SizedBox(width: 8),
                   Text('Mobile Programming Student'),
+                ],
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: const [
+                  Column(
+                    children: [
+                      Text('8', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                      Text('Widget'),
+                    ],
+                  ),
+                  Column(
+                    children: [
+                      Text('4', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                      Text('Layout'),
+                    ],
+                  ),
+                  Column(
+                    children: [
+                      Text('1', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                      Text('State'),
+                    ],
+                  ),
                 ],
               ),
             ],
