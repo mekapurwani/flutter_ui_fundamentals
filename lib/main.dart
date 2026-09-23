@@ -7,7 +7,15 @@ void main() {
   runApp(const MyApp());
 }
 
-// ===== Function Reusable: Kartu Statistik =====
+// ===== Data Collection =====
+final List<Map<String, dynamic>> topics = [
+  {'title': 'Git & GitHub', 'subtitle': 'Version control', 'done': true},
+  {'title': 'Dart Fundamentals', 'subtitle': 'Language basics', 'done': true},
+  {'title': 'Flutter UI Fundamentals', 'subtitle': 'Widgets & layout', 'done': false},
+  {'title': '$studentId - $studentName', 'subtitle': 'Pemilik aplikasi', 'done': false},
+];
+
+// ===== Function Reusable =====
 Widget buildStatCard(String value, String label, IconData icon) {
   return Expanded(
     child: Card(
@@ -89,6 +97,44 @@ class _GreetingCardState extends State<GreetingCard> {
   }
 }
 
+// ===== Halaman List Topics =====
+class TopicsPage extends StatelessWidget {
+  const TopicsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(12),
+          child: Text(
+            '$studentId - $studentName',
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
+        ),
+        Expanded(
+          child: ListView.builder(
+            itemCount: topics.length,
+            itemBuilder: (context, index) {
+              final item = topics[index];
+              return ListTile(
+                leading: Icon(
+                  item['done'] == true
+                      ? Icons.check_circle
+                      : Icons.circle_outlined,
+                  color: item['done'] == true ? Colors.green : Colors.grey,
+                ),
+                title: Text(item['title'] as String),
+                subtitle: Text(item['subtitle'] as String),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -100,59 +146,7 @@ class MyApp extends StatelessWidget {
         appBar: AppBar(
           title: const Text('Flutter UI Fundamentals'),
         ),
-        body: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                // Kartu identitas mahasiswa
-                Card(
-                  elevation: 4,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      children: [
-                        CircleAvatar(
-                          radius: 46,
-                          backgroundImage:
-                              AssetImage('assets/images/profile.jpg'),
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          studentName,
-                          style: const TextStyle(
-                              fontSize: 22, fontWeight: FontWeight.bold),
-                        ),
-                        Text(studentId),
-                        const SizedBox(height: 8),
-                        const Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.phone_android),
-                            SizedBox(width: 8),
-                            Text('Mobile Programming Student'),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                // Baris statistik
-                Row(
-                  children: [
-                    buildStatCard('8', 'Widget', Icons.widgets),
-                    buildStatCard('4', 'Layout', Icons.view_quilt),
-                    buildStatCard('1', 'State', Icons.sync),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                // ===== StatefulWidget: GreetingCard =====
-                const GreetingCard(),
-              ],
-            ),
-          ),
-        ),
+        body: TopicsPage(),
       ),
     );
   }
