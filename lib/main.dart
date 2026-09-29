@@ -16,104 +16,91 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('LayoutBuilder Test'),
+          title: const Text('Expanded, Flexible, Wrap'),
         ),
-        body: LayoutBuilder(
-          builder: (context, constraints) {
-            if (constraints.maxWidth < 600) {
-              return const CompactLayout();
-            } else if (constraints.maxWidth < 840) {
-              return const MediumLayout();
-            } else {
-              return const ExpandedLayout();
-            }
-          },
-        ),
-      ),
-    );
-  }
-}
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Identitas
+              Text(
+                '$studentId - $studentName',
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 24),
 
-// ===== Compact Layout =====
-class CompactLayout extends StatelessWidget {
-  const CompactLayout({super.key});
+              // ===== Panel 2:1 dengan Expanded flex =====
+              const Text('Panel 2:1 (Expanded flex)',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: Container(
+                      height: 80,
+                      color: Colors.blue.shade200,
+                      alignment: Alignment.center,
+                      child: const Text('A (flex 2)'),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    flex: 1,
+                    child: Container(
+                      height: 80,
+                      color: Colors.green.shade200,
+                      alignment: Alignment.center,
+                      child: const Text('B (flex 1)'),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      color: Colors.blue.shade50,
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.phone_android, size: 48, color: Colors.blue),
-          const SizedBox(height: 12),
-          Text(
-            '$studentId - $studentName',
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              // ===== Wrap: 6 Chip Skill =====
+              const Text('Skill (Wrap)',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: const [
+                  Chip(label: Text('Flutter')),
+                  Chip(label: Text('Dart')),
+                  Chip(label: Text('UI/UX')),
+                  Chip(label: Text('Android')),
+                  Chip(label: Text('Git')),
+                  Chip(label: Text('Firebase')),
+                ],
+              ),
+              const SizedBox(height: 24),
+
+              // ===== Perbandingan: Row biasa (bisa overflow) =====
+              const Text('Perbandingan: Row biasa (overflow)',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: const [
+                    Chip(label: Text('Flutter')),
+                    SizedBox(width: 8),
+                    Chip(label: Text('Dart')),
+                    SizedBox(width: 8),
+                    Chip(label: Text('UI/UX')),
+                    SizedBox(width: 8),
+                    Chip(label: Text('Android')),
+                    SizedBox(width: 8),
+                    Chip(label: Text('Git')),
+                    SizedBox(width: 8),
+                    Chip(label: Text('Firebase')),
+                  ],
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 8),
-          const Text('Layout: Compact', style: TextStyle(fontSize: 16)),
-        ],
-      ),
-    );
-  }
-}
-
-// ===== Medium Layout =====
-class MediumLayout extends StatelessWidget {
-  const MediumLayout({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      color: Colors.green.shade50,
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.tablet_android, size: 64, color: Colors.green),
-          const SizedBox(height: 16),
-          Text(
-            '$studentId - $studentName',
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          const Text('Layout: Medium', style: TextStyle(fontSize: 18)),
-        ],
-      ),
-    );
-  }
-}
-
-// ===== Expanded Layout =====
-class ExpandedLayout extends StatelessWidget {
-  const ExpandedLayout({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      color: Colors.orange.shade50,
-      padding: const EdgeInsets.all(32),
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.desktop_windows, size: 80, color: Colors.orange),
-            const SizedBox(height: 20),
-            Text(
-              '$studentId - $studentName',
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            const Text('Layout: Expanded', style: TextStyle(fontSize: 22)),
-          ],
         ),
       ),
     );
