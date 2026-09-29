@@ -14,112 +14,87 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const ProfileFormPage(),
+      home: const HomePage(),
     );
   }
 }
 
-class ProfileFormPage extends StatelessWidget {
-  const ProfileFormPage({super.key});
+// ===== HomePage =====
+class HomePage extends StatelessWidget {
+  const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Scrollable Content'),
+        title: const Text('Home'),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Identitas
-            Text(
-              '$studentId - $studentName',
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-            ),
-            const SizedBox(height: 24),
-
-            // Field 1: Nama
-            const Text('Nama Lengkap'),
-            const SizedBox(height: 6),
-            const TextField(
-              decoration: InputDecoration(
-                hintText: 'Tulis nama lengkap',
-                border: OutlineInputBorder(),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                '$studentId - $studentName',
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
-            ),
-            const SizedBox(height: 20),
-
-            // Field 2: NIM
-            const Text('NIM'),
-            const SizedBox(height: 6),
-            const TextField(
-              decoration: InputDecoration(
-                hintText: 'Tulis NIM',
-                border: OutlineInputBorder(),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const DetailPage(),
+                    ),
+                  );
+                },
+                child: const Text('Buka Detail'),
               ),
-            ),
-            const SizedBox(height: 20),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
 
-            // Field 3: Email
-            const Text('Email'),
-            const SizedBox(height: 6),
-            const TextField(
-              keyboardType: TextInputType.emailAddress,
-              decoration: InputDecoration(
-                hintText: 'Tulis email',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 20),
+// ===== DetailPage =====
+class DetailPage extends StatelessWidget {
+  const DetailPage({super.key});
 
-            // Field 4: No HP
-            const Text('No. HP'),
-            const SizedBox(height: 6),
-            const TextField(
-              keyboardType: TextInputType.phone,
-              decoration: InputDecoration(
-                hintText: 'Tulis no HP',
-                border: OutlineInputBorder(),
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Detail'),
+      ),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                '$studentId - $studentName',
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
-            ),
-            const SizedBox(height: 20),
-
-            // Field 5: Alamat
-            const Text('Alamat'),
-            const SizedBox(height: 6),
-            const TextField(
-              maxLines: 3,
-              decoration: InputDecoration(
-                hintText: 'Tulis alamat lengkap',
-                border: OutlineInputBorder(),
+              const SizedBox(height: 24),
+              const Text(
+                'Ini adalah halaman Detail',
+                style: TextStyle(fontSize: 18),
               ),
-            ),
-            const SizedBox(height: 20),
-
-            // Field 6: Komentar
-            const Text('Komentar'),
-            const SizedBox(height: 6),
-            const TextField(
-              maxLines: 4,
-              decoration: InputDecoration(
-                hintText: 'Tulis komentar',
-                border: OutlineInputBorder(),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text('Kembali'),
               ),
-            ),
-            const SizedBox(height: 24),
-
-            // Tombol
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {},
-                child: const Text('Simpan'),
-              ),
-            ),
-            const SizedBox(height: 20),
-          ],
+            ],
+          ),
         ),
       ),
     );
