@@ -1,74 +1,10 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;
 
 const String studentName = 'Ni Luh Meka Purwani';
 const String studentId = '2415051089';
 
 void main() {
   runApp(const MyApp());
-}
-
-Future<Map<String, dynamic>> loadStudentData() async {
-  final jsonString = await rootBundle.loadString(
-    'assets/data/student_data.json',
-  );
-  return jsonDecode(jsonString) as Map<String, dynamic>;
-}
-
-// ===== Function: jumlah kolom berdasarkan lebar =====
-int columnsFor(double width) {
-  if (width < 600) return 1;
-  if (width < 840) return 2;
-  return 3;
-}
-
-// ===== Course Card =====
-Widget buildCourseCard(Map<String, dynamic> course) {
-  final String status = course['status'] as String;
-  Color color;
-  String label;
-
-  if (status == 'done') {
-    color = Colors.green;
-    label = 'Selesai';
-  } else if (status == 'active') {
-    color = Colors.orange;
-    label = 'Berjalan';
-  } else {
-    color = Colors.grey;
-    label = 'Belum';
-  }
-
-  return Card(
-    child: Padding(
-      padding: const EdgeInsets.all(12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            course['title'] as String,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            '${course['code']} • ${course['credits']} SKS',
-            style: const TextStyle(fontSize: 12, color: Colors.black54),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            label,
-            style: TextStyle(
-              color: color,
-              fontWeight: FontWeight.bold,
-              fontSize: 12,
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
 }
 
 class MyApp extends StatelessWidget {
@@ -78,88 +14,113 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const CoursesGridPage(),
+      home: const ProfileFormPage(),
     );
   }
 }
 
-class CoursesGridPage extends StatefulWidget {
-  const CoursesGridPage({super.key});
+class ProfileFormPage extends StatelessWidget {
+  const ProfileFormPage({super.key});
 
-  @override
-  State<CoursesGridPage> createState() => _CoursesGridPageState();
-}
-
-class _CoursesGridPageState extends State<CoursesGridPage> {
-  late Future<Map<String, dynamic>> studentFuture;
-
-  @override
-  void initState() {
-    super.initState();
-    studentFuture = loadStudentData();
-  }
-  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('GridView Responsive'),
+        title: const Text('Scrollable Content'),
       ),
-      body: FutureBuilder<Map<String, dynamic>>(
-        future: studentFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return Center(child: Text('Gagal memuat data: ${snapshot.error}'));
-          }
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Identitas
+            Text(
+              '$studentId - $studentName',
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+            const SizedBox(height: 24),
 
-          final data = snapshot.data!;
-          final courses = data['courses'] as List<dynamic>;
-
-          return Column(
-            children: [
-              // Header identitas
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(12),
-                color: Colors.blue.shade50,
-                child: Text(
-                  '$studentId - $studentName',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                ),
+            // Field 1: Nama
+            const Text('Nama Lengkap'),
+            const SizedBox(height: 6),
+            const TextField(
+              decoration: InputDecoration(
+                hintText: 'Tulis nama lengkap',
+                border: OutlineInputBorder(),
               ),
+            ),
+            const SizedBox(height: 20),
 
-              // GridView responsif
-              Expanded(
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    final int cols = columnsFor(constraints.maxWidth);
-                    return GridView.builder(
-                      padding: const EdgeInsets.all(12),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: cols,
-                        crossAxisSpacing: 12,
-                        mainAxisSpacing: 12,
-                        childAspectRatio: cols == 1 ? 2.5 : 1.6,
-                      ),
-                      itemCount: courses.length,
-                      itemBuilder: (context, index) {
-                        final course = courses[index] as Map<String, dynamic>;
-                        return buildCourseCard(course);
-                      },
-                    );
-                  },
-                ),
+            // Field 2: NIM
+            const Text('NIM'),
+            const SizedBox(height: 6),
+            const TextField(
+              decoration: InputDecoration(
+                hintText: 'Tulis NIM',
+                border: OutlineInputBorder(),
               ),
-            ],
-          );
-        },
+            ),
+            const SizedBox(height: 20),
+
+            // Field 3: Email
+            const Text('Email'),
+            const SizedBox(height: 6),
+            const TextField(
+              keyboardType: TextInputType.emailAddress,
+              decoration: InputDecoration(
+                hintText: 'Tulis email',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // Field 4: No HP
+            const Text('No. HP'),
+            const SizedBox(height: 6),
+            const TextField(
+              keyboardType: TextInputType.phone,
+              decoration: InputDecoration(
+                hintText: 'Tulis no HP',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // Field 5: Alamat
+            const Text('Alamat'),
+            const SizedBox(height: 6),
+            const TextField(
+              maxLines: 3,
+              decoration: InputDecoration(
+                hintText: 'Tulis alamat lengkap',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // Field 6: Komentar
+            const Text('Komentar'),
+            const SizedBox(height: 6),
+            const TextField(
+              maxLines: 4,
+              decoration: InputDecoration(
+                hintText: 'Tulis komentar',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // Tombol
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {},
+                child: const Text('Simpan'),
+              ),
+            ),
+            const SizedBox(height: 20),
+          ],
+        ),
       ),
     );
   }
