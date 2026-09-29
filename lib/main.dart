@@ -1,10 +1,74 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
 
 const String studentName = 'Ni Luh Meka Purwani';
 const String studentId = '2415051089';
 
 void main() {
   runApp(const MyApp());
+}
+
+Future<Map<String, dynamic>> loadStudentData() async {
+  final jsonString = await rootBundle.loadString(
+    'assets/data/student_data.json',
+  );
+  return jsonDecode(jsonString) as Map<String, dynamic>;
+}
+
+// ===== Function: jumlah kolom berdasarkan lebar =====
+int columnsFor(double width) {
+  if (width < 600) return 1;
+  if (width < 840) return 2;
+  return 3;
+}
+
+// ===== Course Card =====
+Widget buildCourseCard(Map<String, dynamic> course) {
+  final String status = course['status'] as String;
+  Color color;
+  String label;
+
+  if (status == 'done') {
+    color = Colors.green;
+    label = 'Selesai';
+  } else if (status == 'active') {
+    color = Colors.orange;
+    label = 'Berjalan';
+  } else {
+    color = Colors.grey;
+    label = 'Belum';
+  }
+
+  return Card(
+    child: Padding(
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            course['title'] as String,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '${course['code']} • ${course['credits']} SKS',
+            style: const TextStyle(fontSize: 12, color: Colors.black54),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -14,94 +78,88 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Expanded, Flexible, Wrap'),
-        ),
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+      home: const CoursesGridPage(),
+    );
+  }
+}
+
+class CoursesGridPage extends StatefulWidget {
+  const CoursesGridPage({super.key});
+
+  @override
+  State<CoursesGridPage> createState() => _CoursesGridPageState();
+}
+
+class _CoursesGridPageState extends State<CoursesGridPage> {
+  late Future<Map<String, dynamic>> studentFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    studentFuture = loadStudentData();
+  }
+  
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('GridView Responsive'),
+      ),
+      body: FutureBuilder<Map<String, dynamic>>(
+        future: studentFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return Center(child: Text('Gagal memuat data: ${snapshot.error}'));
+          }
+
+          final data = snapshot.data!;
+          final courses = data['courses'] as List<dynamic>;
+
+          return Column(
             children: [
-              // Identitas
-              Text(
-                '$studentId - $studentName',
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 24),
-
-              // ===== Panel 2:1 dengan Expanded flex =====
-              const Text('Panel 2:1 (Expanded flex)',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: Container(
-                      height: 80,
-                      color: Colors.blue.shade200,
-                      alignment: Alignment.center,
-                      child: const Text('A (flex 2)'),
-                    ),
+              // Header identitas
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                color: Colors.blue.shade50,
+                child: Text(
+                  '$studentId - $studentName',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    flex: 1,
-                    child: Container(
-                      height: 80,
-                      color: Colors.green.shade200,
-                      alignment: Alignment.center,
-                      child: const Text('B (flex 1)'),
-                    ),
-                  ),
-                ],
+                ),
               ),
-              const SizedBox(height: 24),
 
-              // ===== Wrap: 6 Chip Skill =====
-              const Text('Skill (Wrap)',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: const [
-                  Chip(label: Text('Flutter')),
-                  Chip(label: Text('Dart')),
-                  Chip(label: Text('UI/UX')),
-                  Chip(label: Text('Android')),
-                  Chip(label: Text('Git')),
-                  Chip(label: Text('Firebase')),
-                ],
-              ),
-              const SizedBox(height: 24),
-
-              // ===== Perbandingan: Row biasa (bisa overflow) =====
-              const Text('Perbandingan: Row biasa (overflow)',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: const [
-                    Chip(label: Text('Flutter')),
-                    SizedBox(width: 8),
-                    Chip(label: Text('Dart')),
-                    SizedBox(width: 8),
-                    Chip(label: Text('UI/UX')),
-                    SizedBox(width: 8),
-                    Chip(label: Text('Android')),
-                    SizedBox(width: 8),
-                    Chip(label: Text('Git')),
-                    SizedBox(width: 8),
-                    Chip(label: Text('Firebase')),
-                  ],
+              // GridView responsif
+              Expanded(
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final int cols = columnsFor(constraints.maxWidth);
+                    return GridView.builder(
+                      padding: const EdgeInsets.all(12),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: cols,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                        childAspectRatio: cols == 1 ? 2.5 : 1.6,
+                      ),
+                      itemCount: courses.length,
+                      itemBuilder: (context, index) {
+                        final course = courses[index] as Map<String, dynamic>;
+                        return buildCourseCard(course);
+                      },
+                    );
+                  },
                 ),
               ),
             ],
-          ),
-        ),
+          );
+        },
       ),
     );
   }
