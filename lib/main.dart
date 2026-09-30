@@ -67,18 +67,11 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
       },
       labelType: NavigationRailLabelType.all,
       destinations: const [
+        NavigationRailDestination(icon: Icon(Icons.home), label: Text('Home')),
         NavigationRailDestination(
-          icon: Icon(Icons.home),
-          label: Text('Home'),
-        ),
+            icon: Icon(Icons.school), label: Text('Courses')),
         NavigationRailDestination(
-          icon: Icon(Icons.school),
-          label: Text('Courses'),
-        ),
-        NavigationRailDestination(
-          icon: Icon(Icons.person),
-          label: Text('Profile'),
-        ),
+            icon: Icon(Icons.person), label: Text('Profile')),
       ],
     );
   }
@@ -142,7 +135,7 @@ class HomeTab extends StatelessWidget {
   }
 }
 
-// ===== Tab Courses (dengan interaksi) =====
+// ===== Tab Courses =====
 class CoursesTab extends StatefulWidget {
   const CoursesTab({super.key});
 
@@ -152,7 +145,7 @@ class CoursesTab extends StatefulWidget {
 
 class _CoursesTabState extends State<CoursesTab> {
   late Future<Map<String, dynamic>> studentFuture;
-  final Set<String> favorites = {}; // Menyimpan kode course yang di-favorite
+  final Set<String> favorites = {};
 
   @override
   void initState() {
@@ -230,7 +223,6 @@ class _CoursesTabState extends State<CoursesTab> {
                           horizontal: 12, vertical: 6),
                       child: InkWell(
                         onTap: () {
-                          // Tap → SnackBar
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
@@ -261,7 +253,6 @@ class _CoursesTabState extends State<CoursesTab> {
                   },
                 ),
               ),
-              // Info jumlah favorite
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(8),
@@ -284,46 +275,161 @@ class _CoursesTabState extends State<CoursesTab> {
   }
 }
 
-// ===== Tab Profile =====
-class ProfileTab extends StatelessWidget {
+// ===== Tab Profile + Form Feedback =====
+class ProfileTab extends StatefulWidget {
   const ProfileTab({super.key});
+
+  @override
+  State<ProfileTab> createState() => _ProfileTabState();
+}
+
+class _ProfileTabState extends State<ProfileTab> {
+  final _formKey = GlobalKey<FormState>();
+  final _namaCtrl = TextEditingController(text: studentName);
+  final _nimCtrl = TextEditingController(text: studentId);
+  final _komentarCtrl = TextEditingController();
+
+  String? _hasil;
+
+  @override
+  void dispose() {
+    _namaCtrl.dispose();
+    _nimCtrl.dispose();
+    _komentarCtrl.dispose();
+    super.dispose();
+  }
+
+  void _submitForm() {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        _hasil = 'Terima kasih ${_namaCtrl.text} (${_nimCtrl.text})!\n'
+            'Komentar: ${_komentarCtrl.text}';
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Profile')),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              CircleAvatar(
-                radius: 50,
-                backgroundImage: AssetImage('assets/images/profile.jpg'),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                studentName,
-                style: const TextStyle(
-                    fontSize: 22, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                studentId,
-                style: const TextStyle(fontSize: 16, color: Colors.black54),
-              ),
-              const SizedBox(height: 24),
-              const Row(
-                mainAxisSize: MainAxisSize.min,
+      appBar: AppBar(title: const Text('Profile & Feedback')),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Profile Header
+            Center(
+              child: Column(
                 children: [
-                  Icon(Icons.phone_android),
-                  SizedBox(width: 8),
-                  Text('Mobile Programming Student'),
+                  CircleAvatar(
+                    radius: 50,
+                    backgroundImage: AssetImage('assets/images/profile.jpg'),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    studentName,
+                    style: const TextStyle(
+                        fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    studentId,
+                    style: const TextStyle(
+                        fontSize: 14, color: Colors.black54),
+                  ),
                 ],
               ),
+            ),
+            const SizedBox(height: 24),
+            const Divider(),
+            const SizedBox(height: 12),
+            const Text(
+              'Form Feedback',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+
+            // Form Feedback
+            Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  TextFormField(
+                    controller: _namaCtrl,
+                    decoration: const InputDecoration(
+                      labelText: 'Nama',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Nama wajib diisi';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _nimCtrl,
+                    decoration: const InputDecoration(
+                      labelText: 'NIM',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'NIM wajib diisi';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _komentarCtrl,
+                    maxLines: 3,
+                    decoration: const InputDecoration(
+                      labelText: 'Komentar',
+                      hintText: 'Minimal 5 karakter',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Komentar wajib diisi';
+                      }
+                      if (value.trim().length < 5) {
+                        return 'Komentar minimal 5 karakter';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: _submitForm,
+                      icon: const Icon(Icons.send),
+                      label: const Text('Kirim Feedback'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Hasil
+            if (_hasil != null) ...[
+              const SizedBox(height: 24),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.green.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.green.shade200),
+                ),
+                child: Text(
+                  _hasil!,
+                  style: const TextStyle(color: Colors.green),
+                ),
+              ),
             ],
-          ),
+          ],
         ),
       ),
     );
