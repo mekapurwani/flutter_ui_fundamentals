@@ -290,6 +290,7 @@ class _ProfileTabState extends State<ProfileTab> {
   final _komentarCtrl = TextEditingController();
 
   String? _hasil;
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -299,13 +300,61 @@ class _ProfileTabState extends State<ProfileTab> {
     super.dispose();
   }
 
-  void _submitForm() {
-    if (_formKey.currentState!.validate()) {
-      setState(() {
-        _hasil = 'Terima kasih ${_namaCtrl.text} (${_nimCtrl.text})!\n'
-            'Komentar: ${_komentarCtrl.text}';
-      });
+  // STEP 1: Validasi → Unfocus keyboard → Dialog konfirmasi
+  Future<void> _konfirmasiSubmit() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
     }
+
+    // Sembunyikan keyboard supaya tidak menutupi dialog
+    FocusScope.of(context).unfocus();
+
+    final konfirmasi = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Konfirmasi'),
+        content: const Text('Apakah data sudah benar dan ingin dikirim?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Batal'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Kirim'),
+          ),
+        ],
+      ),
+    );
+
+    if (konfirmasi == true) {
+      _submitForm();
+    }
+  }
+
+  // STEP 2: Loading + SnackBar
+  Future<void> _submitForm() async {
+    setState(() => _isLoading = true);
+
+    // Simulasi loading 2 detik
+    await Future.delayed(const Duration(seconds: 2));
+
+    if (!mounted) return;
+
+    setState(() {
+      _isLoading = false;
+      _hasil = 'Terima kasih ${_namaCtrl.text} (${_nimCtrl.text})!\n'
+          'Komentar: ${_komentarCtrl.text}';
+    });
+
+    // STEP 3: SnackBar hijau
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Data berhasil disimpan'),
+        backgroundColor: Colors.green,
+        duration: Duration(seconds: 3),
+      ),
+    );
   }
 
   @override
@@ -400,19 +449,30 @@ class _ProfileTabState extends State<ProfileTab> {
                     },
                   ),
                   const SizedBox(height: 16),
+
+                  // Tombol dengan Loading state
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
-                      onPressed: _submitForm,
-                      icon: const Icon(Icons.send),
-                      label: const Text('Kirim Feedback'),
+                      onPressed: _isLoading ? null : _konfirmasiSubmit,
+                      icon: _isLoading
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Icon(Icons.send),
+                      label: Text(_isLoading ? 'Mengirim...' : 'Kirim Feedback'),
                     ),
                   ),
                 ],
               ),
             ),
 
-            // Hasil
+            // Hasil feedback
             if (_hasil != null) ...[
               const SizedBox(height: 24),
               Container(
