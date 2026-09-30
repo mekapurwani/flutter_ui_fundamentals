@@ -38,11 +38,34 @@ class CoursesListPage extends StatefulWidget {
 
 class _CoursesListPageState extends State<CoursesListPage> {
   late Future<Map<String, dynamic>> studentFuture;
+  String? lastPicked;
 
   @override
   void initState() {
     super.initState();
     studentFuture = loadStudentData();
+  }
+
+  Future<void> _openDetail(Map<String, dynamic> course) async {
+    final result = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => CourseDetailPage(course: course),
+      ),
+    );
+
+    if (result == true) {
+      setState(() {
+        lastPicked = course['title'] as String;
+      });
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Course "${course['title']}" ditambahkan ke favorite'),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   @override
@@ -66,7 +89,6 @@ class _CoursesListPageState extends State<CoursesListPage> {
 
           return Column(
             children: [
-              // Header identitas
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(12),
@@ -77,8 +99,21 @@ class _CoursesListPageState extends State<CoursesListPage> {
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
-
-              // List Course
+              if (lastPicked != null)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(8),
+                  color: Colors.green.shade50,
+                  child: Text(
+                    'Favorite terakhir: $lastPicked',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: Colors.green,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
               Expanded(
                 child: ListView.builder(
                   itemCount: courses.length,
@@ -92,15 +127,7 @@ class _CoursesListPageState extends State<CoursesListPage> {
                         title: Text(course['title'] as String),
                         subtitle: Text(course['code'] as String),
                         trailing: const Icon(Icons.chevron_right),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  CourseDetailPage(course: course),
-                            ),
-                          );
-                        },
+                        onTap: () => _openDetail(course),
                       ),
                     );
                   },
@@ -149,7 +176,6 @@ class CourseDetailPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Identitas Mahasiswa
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(12),
@@ -164,8 +190,6 @@ class CourseDetailPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-
-            // Detail Course
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16),
@@ -204,6 +228,23 @@ class CourseDetailPage extends StatelessWidget {
                 ),
               ),
             ),
+
+            // ===== HANYA tombol Pilih / Favorite =====
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.pop(context, true);
+                },
+                icon: const Icon(Icons.favorite),
+                label: const Text('Pilih / Favorite'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.pink.shade100,
+                  foregroundColor: Colors.pink.shade800,
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -215,15 +256,9 @@ class CourseDetailPage extends StatelessWidget {
       children: [
         SizedBox(
           width: 80,
-          child: Text(
-            label,
-            style: const TextStyle(color: Colors.black54),
-          ),
+          child: Text(label, style: const TextStyle(color: Colors.black54)),
         ),
-        Text(
-          value,
-          style: const TextStyle(fontWeight: FontWeight.w500),
-        ),
+        Text(value, style: const TextStyle(fontWeight: FontWeight.w500)),
       ],
     );
   }
