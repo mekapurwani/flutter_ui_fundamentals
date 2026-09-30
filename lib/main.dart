@@ -45,7 +45,6 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
     ProfileTab(),
   ];
 
-  // ===== NavigationBar (bawah) untuk compact/medium =====
   Widget _buildNavigationBar() {
     return NavigationBar(
       selectedIndex: currentIndex,
@@ -60,7 +59,6 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
     );
   }
 
-  // ===== NavigationRail (samping) untuk expanded =====
   Widget _buildNavigationRail() {
     return NavigationRail(
       selectedIndex: currentIndex,
@@ -89,15 +87,12 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Compact/Medium → NavigationBar di bawah
         if (constraints.maxWidth < 840) {
           return Scaffold(
             body: _pages[currentIndex],
             bottomNavigationBar: _buildNavigationBar(),
           );
         }
-
-        // Expanded → NavigationRail di samping
         return Scaffold(
           body: Row(
             children: [
@@ -147,7 +142,7 @@ class HomeTab extends StatelessWidget {
   }
 }
 
-// ===== Tab Courses =====
+// ===== Tab Courses (dengan interaksi) =====
 class CoursesTab extends StatefulWidget {
   const CoursesTab({super.key});
 
@@ -157,11 +152,40 @@ class CoursesTab extends StatefulWidget {
 
 class _CoursesTabState extends State<CoursesTab> {
   late Future<Map<String, dynamic>> studentFuture;
+  final Set<String> favorites = {}; // Menyimpan kode course yang di-favorite
 
   @override
   void initState() {
     super.initState();
     studentFuture = loadStudentData();
+  }
+
+  void _toggleFavorite(String code) {
+    setState(() {
+      if (favorites.contains(code)) {
+        favorites.remove(code);
+      } else {
+        favorites.add(code);
+      }
+    });
+  }
+
+  void _showLongPressInfo(Map<String, dynamic> course) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text(course['title'] as String),
+        content: Text(
+          'Kode: ${course['code']}\nSKS: ${course['credits']}\nStatus: ${course['status']}',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Tutup'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -198,17 +222,58 @@ class _CoursesTabState extends State<CoursesTab> {
                   itemCount: courses.length,
                   itemBuilder: (context, index) {
                     final course = courses[index] as Map<String, dynamic>;
+                    final String code = course['code'] as String;
+                    final bool isFavorite = favorites.contains(code);
+
                     return Card(
                       margin: const EdgeInsets.symmetric(
                           horizontal: 12, vertical: 6),
-                      child: ListTile(
-                        leading: const Icon(Icons.book, color: Colors.blue),
-                        title: Text(course['title'] as String),
-                        subtitle: Text(course['code'] as String),
-                        trailing: const Icon(Icons.chevron_right),
+                      child: InkWell(
+                        onTap: () {
+                          // Tap → SnackBar
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Kamu memilih: ${course['title']}',
+                              ),
+                              duration: const Duration(seconds: 1),
+                            ),
+                          );
+                        },
+                        onLongPress: () => _showLongPressInfo(course),
+                        borderRadius: BorderRadius.circular(12),
+                        child: ListTile(
+                          leading: const Icon(Icons.book, color: Colors.blue),
+                          title: Text(course['title'] as String),
+                          subtitle: Text(code),
+                          trailing: IconButton(
+                            icon: Icon(
+                              isFavorite
+                                  ? Icons.favorite
+                                  : Icons.favorite_border,
+                              color: isFavorite ? Colors.pink : Colors.grey,
+                            ),
+                            onPressed: () => _toggleFavorite(code),
+                          ),
+                        ),
                       ),
                     );
                   },
+                ),
+              ),
+              // Info jumlah favorite
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(8),
+                color: Colors.pink.shade50,
+                child: Text(
+                  '${favorites.length} course di-favorite',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.pink,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
                 ),
               ),
             ],
