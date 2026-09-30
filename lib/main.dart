@@ -23,22 +23,92 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const CoursesListPage(),
+      home: const MainNavigationPage(),
     );
   }
 }
 
-// ===== Halaman Daftar Course =====
-class CoursesListPage extends StatefulWidget {
-  const CoursesListPage({super.key});
+// ===== Halaman Utama dengan NavigationBar =====
+class MainNavigationPage extends StatefulWidget {
+  const MainNavigationPage({super.key});
 
   @override
-  State<CoursesListPage> createState() => _CoursesListPageState();
+  State<MainNavigationPage> createState() => _MainNavigationPageState();
 }
 
-class _CoursesListPageState extends State<CoursesListPage> {
+class _MainNavigationPageState extends State<MainNavigationPage> {
+  int currentIndex = 0;
+
+  final List<Widget> _pages = const [
+    HomeTab(),
+    CoursesTab(),
+    ProfileTab(),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: _pages[currentIndex],
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: currentIndex,
+        onDestinationSelected: (index) {
+          setState(() => currentIndex = index);
+        },
+        destinations: const [
+          NavigationDestination(icon: Icon(Icons.home), label: 'Home'),
+          NavigationDestination(icon: Icon(Icons.school), label: 'Courses'),
+          NavigationDestination(icon: Icon(Icons.person), label: 'Profile'),
+        ],
+      ),
+    );
+  }
+}
+
+// ===== Tab Home =====
+class HomeTab extends StatelessWidget {
+  const HomeTab({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Home')),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.home, size: 80, color: Colors.blue),
+              const SizedBox(height: 16),
+              const Text(
+                'Selamat datang di Course Explorer',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                '$studentId - $studentName',
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 14, color: Colors.black54),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ===== Tab Courses =====
+class CoursesTab extends StatefulWidget {
+  const CoursesTab({super.key});
+
+  @override
+  State<CoursesTab> createState() => _CoursesTabState();
+}
+
+class _CoursesTabState extends State<CoursesTab> {
   late Future<Map<String, dynamic>> studentFuture;
-  String? lastPicked;
 
   @override
   void initState() {
@@ -46,34 +116,10 @@ class _CoursesListPageState extends State<CoursesListPage> {
     studentFuture = loadStudentData();
   }
 
-  Future<void> _openDetail(Map<String, dynamic> course) async {
-    final result = await Navigator.push<bool>(
-      context,
-      MaterialPageRoute(
-        builder: (_) => CourseDetailPage(course: course),
-      ),
-    );
-
-    if (result == true) {
-      setState(() {
-        lastPicked = course['title'] as String;
-      });
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Course "${course['title']}" ditambahkan ke favorite'),
-          duration: const Duration(seconds: 2),
-        ),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Daftar Course'),
-      ),
+      appBar: AppBar(title: const Text('Daftar Course')),
       body: FutureBuilder<Map<String, dynamic>>(
         future: studentFuture,
         builder: (context, snapshot) {
@@ -99,21 +145,6 @@ class _CoursesListPageState extends State<CoursesListPage> {
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
-              if (lastPicked != null)
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(8),
-                  color: Colors.green.shade50,
-                  child: Text(
-                    'Favorite terakhir: $lastPicked',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: Colors.green,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
               Expanded(
                 child: ListView.builder(
                   itemCount: courses.length,
@@ -127,7 +158,6 @@ class _CoursesListPageState extends State<CoursesListPage> {
                         title: Text(course['title'] as String),
                         subtitle: Text(course['code'] as String),
                         trailing: const Icon(Icons.chevron_right),
-                        onTap: () => _openDetail(course),
                       ),
                     );
                   },
@@ -141,125 +171,48 @@ class _CoursesListPageState extends State<CoursesListPage> {
   }
 }
 
-// ===== Halaman Detail Course =====
-class CourseDetailPage extends StatelessWidget {
-  final Map<String, dynamic> course;
-
-  const CourseDetailPage({
-    super.key,
-    required this.course,
-  });
+// ===== Tab Profile =====
+class ProfileTab extends StatelessWidget {
+  const ProfileTab({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final String status = course['status'] as String;
-    Color statusColor;
-    String statusLabel;
-
-    if (status == 'done') {
-      statusColor = Colors.green;
-      statusLabel = 'Selesai';
-    } else if (status == 'active') {
-      statusColor = Colors.orange;
-      statusLabel = 'Berjalan';
-    } else {
-      statusColor = Colors.grey;
-      statusLabel = 'Belum';
-    }
-
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Detail Course'),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.blue.shade50,
-                borderRadius: BorderRadius.circular(12),
+      appBar: AppBar(title: const Text('Profile')),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircleAvatar(
+                radius: 50,
+                backgroundImage: AssetImage('assets/images/profile.jpg'),
               ),
-              child: Text(
-                '$studentId - $studentName',
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontWeight: FontWeight.bold),
+              const SizedBox(height: 20),
+              Text(
+                studentName,
+                style: const TextStyle(
+                    fontSize: 22, fontWeight: FontWeight.bold),
               ),
-            ),
-            const SizedBox(height: 24),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      course['title'] as String,
-                      style: const TextStyle(
-                          fontSize: 22, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 12),
-                    _rowInfo('Kode', course['code'] as String),
-                    const SizedBox(height: 8),
-                    _rowInfo('SKS', '${course['credits']} SKS'),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        const SizedBox(
-                          width: 80,
-                          child: Text(
-                            'Status',
-                            style: TextStyle(color: Colors.black54),
-                          ),
-                        ),
-                        Text(
-                          statusLabel,
-                          style: TextStyle(
-                            color: statusColor,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+              const SizedBox(height: 8),
+              Text(
+                studentId,
+                style: const TextStyle(fontSize: 16, color: Colors.black54),
               ),
-            ),
-
-            // ===== HANYA tombol Pilih / Favorite =====
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.pop(context, true);
-                },
-                icon: const Icon(Icons.favorite),
-                label: const Text('Pilih / Favorite'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.pink.shade100,
-                  foregroundColor: Colors.pink.shade800,
-                ),
+              const SizedBox(height: 24),
+              const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.phone_android),
+                  SizedBox(width: 8),
+                  Text('Mobile Programming Student'),
+                ],
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-    );
-  }
-
-  Widget _rowInfo(String label, String value) {
-    return Row(
-      children: [
-        SizedBox(
-          width: 80,
-          child: Text(label, style: const TextStyle(color: Colors.black54)),
-        ),
-        Text(value, style: const TextStyle(fontWeight: FontWeight.w500)),
-      ],
     );
   }
 }
