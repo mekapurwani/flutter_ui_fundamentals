@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
-// ===== Halaman Utama dengan NavigationBar =====
+// ===== Halaman Utama dengan Adaptive Navigation =====
 class MainNavigationPage extends StatefulWidget {
   const MainNavigationPage({super.key});
 
@@ -45,21 +45,69 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
     ProfileTab(),
   ];
 
+  // ===== NavigationBar (bawah) untuk compact/medium =====
+  Widget _buildNavigationBar() {
+    return NavigationBar(
+      selectedIndex: currentIndex,
+      onDestinationSelected: (index) {
+        setState(() => currentIndex = index);
+      },
+      destinations: const [
+        NavigationDestination(icon: Icon(Icons.home), label: 'Home'),
+        NavigationDestination(icon: Icon(Icons.school), label: 'Courses'),
+        NavigationDestination(icon: Icon(Icons.person), label: 'Profile'),
+      ],
+    );
+  }
+
+  // ===== NavigationRail (samping) untuk expanded =====
+  Widget _buildNavigationRail() {
+    return NavigationRail(
+      selectedIndex: currentIndex,
+      onDestinationSelected: (index) {
+        setState(() => currentIndex = index);
+      },
+      labelType: NavigationRailLabelType.all,
+      destinations: const [
+        NavigationRailDestination(
+          icon: Icon(Icons.home),
+          label: Text('Home'),
+        ),
+        NavigationRailDestination(
+          icon: Icon(Icons.school),
+          label: Text('Courses'),
+        ),
+        NavigationRailDestination(
+          icon: Icon(Icons.person),
+          label: Text('Profile'),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _pages[currentIndex],
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: currentIndex,
-        onDestinationSelected: (index) {
-          setState(() => currentIndex = index);
-        },
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.home), label: 'Home'),
-          NavigationDestination(icon: Icon(Icons.school), label: 'Courses'),
-          NavigationDestination(icon: Icon(Icons.person), label: 'Profile'),
-        ],
-      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Compact/Medium → NavigationBar di bawah
+        if (constraints.maxWidth < 840) {
+          return Scaffold(
+            body: _pages[currentIndex],
+            bottomNavigationBar: _buildNavigationBar(),
+          );
+        }
+
+        // Expanded → NavigationRail di samping
+        return Scaffold(
+          body: Row(
+            children: [
+              _buildNavigationRail(),
+              const VerticalDivider(width: 1),
+              Expanded(child: _pages[currentIndex]),
+            ],
+          ),
+        );
+      },
     );
   }
 }
