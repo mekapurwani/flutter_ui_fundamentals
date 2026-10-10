@@ -28,7 +28,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-// ===== Halaman Utama dengan Adaptive Navigation =====
 class MainNavigationPage extends StatefulWidget {
   const MainNavigationPage({super.key});
 
@@ -100,9 +99,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
   }
 }
 
-// ============================================================
-// REUSABLE WIDGET 1: IdentityHeader
-// ============================================================
+// ===== IdentityHeader =====
 class IdentityHeader extends StatelessWidget {
   const IdentityHeader({super.key});
 
@@ -121,10 +118,8 @@ class IdentityHeader extends StatelessWidget {
   }
 }
 
-// ============================================================
-// REUSABLE WIDGET 2: CourseCard
-// ============================================================
-class CourseCard extends StatelessWidget {
+// ===== CourseCard (STATEFUL dengan _showDetail) =====
+class CourseCard extends StatefulWidget {
   final Map<String, dynamic> course;
   final bool isFavorite;
   final VoidCallback onTap;
@@ -141,8 +136,15 @@ class CourseCard extends StatelessWidget {
   });
 
   @override
+  State<CourseCard> createState() => _CourseCardState();
+}
+
+class _CourseCardState extends State<CourseCard> {
+  bool _showDetail = false;
+
+  @override
   Widget build(BuildContext context) {
-    final status = course['status'] as String;
+    final status = widget.course['status'] as String;
     Color statusColor;
     String statusLabel;
 
@@ -160,8 +162,8 @@ class CourseCard extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       child: InkWell(
-        onTap: onTap,
-        onLongPress: onLongPress,
+        onTap: widget.onTap,
+        onLongPress: widget.onLongPress,
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(12),
@@ -175,7 +177,7 @@ class CourseCard extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      course['title'] as String,
+                      widget.course['title'] as String,
                       style: const TextStyle(
                           fontWeight: FontWeight.bold, fontSize: 14),
                       overflow: TextOverflow.ellipsis,
@@ -183,27 +185,50 @@ class CourseCard extends StatelessWidget {
                   ),
                   IconButton(
                     icon: Icon(
-                      isFavorite ? Icons.favorite : Icons.favorite_border,
-                      color: isFavorite ? Colors.pink : Colors.grey,
+                      widget.isFavorite
+                          ? Icons.favorite
+                          : Icons.favorite_border,
+                      color: widget.isFavorite ? Colors.pink : Colors.grey,
                     ),
-                    onPressed: onFavoriteTap,
+                    onPressed: widget.onFavoriteTap,
                   ),
                 ],
               ),
               const SizedBox(height: 4),
               Text(
-                '${course['code']} • ${course['credits']} SKS',
+                '${widget.course['code']} • ${widget.course['credits']} SKS',
                 style: const TextStyle(fontSize: 12, color: Colors.black54),
               ),
               const SizedBox(height: 4),
-              Text(
-                statusLabel,
-                style: TextStyle(
-                  color: statusColor,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
-                ),
+              Row(
+                children: [
+                  Text(
+                    statusLabel,
+                    style: TextStyle(
+                      color: statusColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                  ),
+                  const Spacer(),
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        _showDetail = !_showDetail;
+                      });
+                    },
+                    child: Text(_showDetail ? 'Hide' : 'Show'),
+                  ),
+                ],
               ),
+              if (_showDetail) ...[
+                const Divider(),
+                Text(
+                  'Detail: Course ini membahas ${widget.course['title']}. '
+                  'Status saat ini: $statusLabel.',
+                  style: const TextStyle(fontSize: 11, color: Colors.black54),
+                ),
+              ],
             ],
           ),
         ),
@@ -212,7 +237,7 @@ class CourseCard extends StatelessWidget {
   }
 }
 
-// ===== Tab Home =====
+// ===== HomeTab =====
 class HomeTab extends StatelessWidget {
   const HomeTab({super.key});
 
@@ -247,7 +272,7 @@ class HomeTab extends StatelessWidget {
   }
 }
 
-// ===== Tab Courses (responsive list/grid) =====
+// ===== CoursesTab =====
 class CoursesTab extends StatefulWidget {
   const CoursesTab({super.key});
 
@@ -335,11 +360,8 @@ class _CoursesTabState extends State<CoursesTab> {
 
           return LayoutBuilder(
             builder: (context, constraints) {
-              // Expanded (>=840): GridView 3 kolom
-              // Medium (600-839): GridView 2 kolom
-              // Compact (<600): ListView 1 kolom
               final bool isCompact = constraints.maxWidth < 600;
-              final bool isExpanded = constraints.maxWidth >= 750;
+              final bool isExpanded = constraints.maxWidth >= 840;
               final int columns = isCompact ? 1 : (isExpanded ? 3 : 2);
 
               return Column(
@@ -371,7 +393,7 @@ class _CoursesTabState extends State<CoursesTab> {
                               crossAxisCount: columns,
                               crossAxisSpacing: 12,
                               mainAxisSpacing: 12,
-                              childAspectRatio: 1.8,
+                              childAspectRatio: 1.5,
                             ),
                             itemCount: courses.length,
                             itemBuilder: (context, index) {
@@ -413,7 +435,7 @@ class _CoursesTabState extends State<CoursesTab> {
   }
 }
 
-// ===== Halaman Detail Course =====
+// ===== Detail Page =====
 class CourseDetailPage extends StatelessWidget {
   final Map<String, dynamic> course;
 
@@ -490,7 +512,7 @@ class CourseDetailPage extends StatelessWidget {
   }
 }
 
-// ===== Tab Profile + Form Feedback =====
+// ===== ProfileTab =====
 class ProfileTab extends StatefulWidget {
   const ProfileTab({super.key});
 
