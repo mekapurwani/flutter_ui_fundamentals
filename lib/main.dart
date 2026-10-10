@@ -1,8 +1,7 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;
 import 'package:provider/provider.dart';
 import 'models/course.dart';
+import 'services/course_service.dart';
 import 'course_state.dart';
 
 const String studentName = 'Ni Luh Meka Purwani';
@@ -15,13 +14,6 @@ void main() {
       child: const MyApp(),
     ),
   );
-}
-
-Future<Map<String, dynamic>> loadStudentData() async {
-  final jsonString = await rootBundle.loadString(
-    'assets/data/student_data.json',
-  );
-  return jsonDecode(jsonString) as Map<String, dynamic>;
 }
 
 class MyApp extends StatelessWidget {
@@ -284,12 +276,13 @@ class CoursesTab extends StatefulWidget {
 }
 
 class _CoursesTabState extends State<CoursesTab> {
-  late Future<Map<String, dynamic>> studentFuture;
+  late Future<List<Course>> coursesFuture;
+  final CourseService courseService = CourseService();
 
   @override
   void initState() {
     super.initState();
-    studentFuture = loadStudentData();
+    coursesFuture = courseService.loadCourses();
   }
 
   void _showLongPressInfo(Course course) {
@@ -335,8 +328,8 @@ class _CoursesTabState extends State<CoursesTab> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Course Explorer')),
-      body: FutureBuilder<Map<String, dynamic>>(
-        future: studentFuture,
+      body: FutureBuilder<List<Course>>(
+        future: coursesFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -345,11 +338,7 @@ class _CoursesTabState extends State<CoursesTab> {
             return Center(child: Text('Gagal memuat data: ${snapshot.error}'));
           }
 
-          final data = snapshot.data!;
-          final coursesData = data['courses'] as List<dynamic>;
-          final courses = coursesData
-              .map((e) => Course.fromJson(e as Map<String, dynamic>))
-              .toList();
+          final courses = snapshot.data!;
 
           return LayoutBuilder(
             builder: (context, constraints) {
