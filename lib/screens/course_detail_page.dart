@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/course.dart';
+import '../providers/course_provider.dart';
 import '../widgets/identity_header.dart';
 
 class CourseDetailPage extends StatelessWidget {
@@ -24,6 +26,8 @@ class CourseDetailPage extends StatelessWidget {
       statusLabel = 'Belum';
     }
 
+    final isFavorite = context.watch<CourseProvider>().isFavorite(course.code);
+
     return Scaffold(
       appBar: AppBar(title: const Text('Detail Course')),
       body: SingleChildScrollView(
@@ -39,10 +43,29 @@ class CourseDetailPage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      course.title,
-                      style: const TextStyle(
-                          fontSize: 22, fontWeight: FontWeight.bold),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            course.title,
+                            style: const TextStyle(
+                                fontSize: 22, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(
+                            isFavorite
+                                ? Icons.favorite
+                                : Icons.favorite_border,
+                            color: isFavorite ? Colors.pink : Colors.grey,
+                          ),
+                          onPressed: () {
+                            context
+                                .read<CourseProvider>()
+                                .toggleFavorite(course.code);
+                          },
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 12),
                     Text('Kode: ${course.code}'),
@@ -62,9 +85,16 @@ class CourseDetailPage extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: () => Navigator.pop(context, true),
+                onPressed: () {
+                  if (!isFavorite) {
+                    context
+                        .read<CourseProvider>()
+                        .toggleFavorite(course.code);
+                  }
+                  Navigator.pop(context, true);
+                },
                 icon: const Icon(Icons.favorite),
-                label: const Text('Pilih / Favorite'),
+                label: Text(isFavorite ? 'Sudah Favorite' : 'Pilih / Favorite'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.pink.shade100,
                   foregroundColor: Colors.pink.shade800,

@@ -5,6 +5,7 @@ import 'repositories/course_repository.dart';
 import 'providers/course_provider.dart';
 import 'screens/home_tab.dart';
 import 'screens/courses_tab.dart';
+import 'screens/favorites_page.dart';
 import 'screens/profile_tab.dart';
 
 const String studentName = 'Ni Luh Meka Purwani';
@@ -46,6 +47,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
   final List<Widget> _pages = const [
     HomeTab(),
     CoursesTab(),
+    FavoritesPage(),
     ProfileTab(),
   ];
 
@@ -58,6 +60,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
       destinations: const [
         NavigationDestination(icon: Icon(Icons.home), label: 'Home'),
         NavigationDestination(icon: Icon(Icons.school), label: 'Courses'),
+        NavigationDestination(icon: Icon(Icons.favorite), label: 'Favorites'),
         NavigationDestination(icon: Icon(Icons.person), label: 'Profile'),
       ],
     );
@@ -74,6 +77,8 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
         NavigationRailDestination(icon: Icon(Icons.home), label: Text('Home')),
         NavigationRailDestination(
             icon: Icon(Icons.school), label: Text('Courses')),
+        NavigationRailDestination(
+            icon: Icon(Icons.favorite), label: Text('Favorites')),
         NavigationRailDestination(
             icon: Icon(Icons.person), label: Text('Profile')),
       ],
