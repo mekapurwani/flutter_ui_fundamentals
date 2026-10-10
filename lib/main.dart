@@ -272,7 +272,7 @@ class HomeTab extends StatelessWidget {
   }
 }
 
-// ===== CoursesTab =====
+// ===== CoursesTab (dengan prop drilling demo) =====
 class CoursesTab extends StatefulWidget {
   const CoursesTab({super.key});
 
@@ -367,6 +367,31 @@ class _CoursesTabState extends State<CoursesTab> {
               return Column(
                 children: [
                   const IdentityHeader(),
+
+                  // ===== PROP DRILLING DEMO: Ringkasan Total & Favorite =====
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 8),
+                    child: Row(
+                      children: [
+                        Text(
+                          'Total: ${courses.length} course',
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                        const Spacer(),
+                        Text(
+                          'Favorite: ${favorites.length}',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.pink,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // ===== END PROP DRILLING DEMO =====
+
                   Expanded(
                     child: isCompact
                         ? ListView.builder(
