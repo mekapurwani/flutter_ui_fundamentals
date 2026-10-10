@@ -1,13 +1,19 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:provider/provider.dart';
 import 'course_state.dart';
 
 const String studentName = 'Ni Luh Meka Purwani';
 const String studentId = '2415051089';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => CourseProvider(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 Future<Map<String, dynamic>> loadStudentData() async {
@@ -278,7 +284,6 @@ class CoursesTab extends StatefulWidget {
 
 class _CoursesTabState extends State<CoursesTab> {
   late Future<Map<String, dynamic>> studentFuture;
-  final CourseState courseState = CourseState();
 
   @override
   void initState() {
@@ -313,8 +318,8 @@ class _CoursesTabState extends State<CoursesTab> {
     );
 
     if (result == true) {
-      courseState.toggleFavorite(course['code'] as String);
       if (!mounted) return;
+      context.read<CourseProvider>().toggleFavorite(course['code'] as String);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('"${course['title']}" ditambahkan ke favorite'),
@@ -348,99 +353,97 @@ class _CoursesTabState extends State<CoursesTab> {
               final bool isExpanded = constraints.maxWidth >= 840;
               final int columns = isCompact ? 1 : (isExpanded ? 3 : 2);
 
-              return ListenableBuilder(
-                listenable: courseState,
-                builder: (context, _) {
-                  return Column(
-                    children: [
-                      const IdentityHeader(),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 8),
-                        child: Row(
-                          children: [
-                            Text(
-                              'Total: ${courses.length} course',
-                              style: const TextStyle(fontSize: 12),
-                            ),
-                            const Spacer(),
-                            Text(
-                              'Favorite: ${courseState.favorites.length}',
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: Colors.pink,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
+              final courseProvider = context.watch<CourseProvider>();
+
+              return Column(
+                children: [
+                  const IdentityHeader(),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 8),
+                    child: Row(
+                      children: [
+                        Text(
+                          'Total: ${courses.length} course',
+                          style: const TextStyle(fontSize: 12),
                         ),
-                      ),
-                      Expanded(
-                        child: isCompact
-                            ? ListView.builder(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 6),
-                                itemCount: courses.length,
-                                itemBuilder: (context, index) {
-                                  final course =
-                                      courses[index] as Map<String, dynamic>;
-                                  final code = course['code'] as String;
-                                  return CourseCard(
-                                    course: course,
-                                    isFavorite:
-                                        courseState.isFavorite(code),
-                                    onTap: () => _openDetail(course),
-                                    onFavoriteTap: () =>
-                                        courseState.toggleFavorite(code),
-                                    onLongPress: () =>
-                                        _showLongPressInfo(course),
-                                  );
-                                },
-                              )
-                            : GridView.builder(
-                                padding: const EdgeInsets.all(12),
-                                gridDelegate:
-                                    SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: columns,
-                                  crossAxisSpacing: 12,
-                                  mainAxisSpacing: 12,
-                                  childAspectRatio: 1.5,
-                                ),
-                                itemCount: courses.length,
-                                itemBuilder: (context, index) {
-                                  final course =
-                                      courses[index] as Map<String, dynamic>;
-                                  final code = course['code'] as String;
-                                  return CourseCard(
-                                    course: course,
-                                    isFavorite:
-                                        courseState.isFavorite(code),
-                                    onTap: () => _openDetail(course),
-                                    onFavoriteTap: () =>
-                                        courseState.toggleFavorite(code),
-                                    onLongPress: () =>
-                                        _showLongPressInfo(course),
-                                  );
-                                },
-                              ),
-                      ),
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(8),
-                        color: Colors.pink.shade50,
-                        child: Text(
-                          '${courseState.favorites.length} course di-favorite',
-                          textAlign: TextAlign.center,
+                        const Spacer(),
+                        Text(
+                          'Favorite: ${courseProvider.favorites.length}',
                           style: const TextStyle(
+                            fontSize: 12,
                             color: Colors.pink,
                             fontWeight: FontWeight.bold,
-                            fontSize: 12,
                           ),
                         ),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: isCompact
+                        ? ListView.builder(
+                            padding: const EdgeInsets.symmetric(vertical: 6),
+                            itemCount: courses.length,
+                            itemBuilder: (context, index) {
+                              final course =
+                                  courses[index] as Map<String, dynamic>;
+                              final code = course['code'] as String;
+                              return CourseCard(
+                                course: course,
+                                isFavorite:
+                                    courseProvider.isFavorite(code),
+                                onTap: () => _openDetail(course),
+                                onFavoriteTap: () => context
+                                    .read<CourseProvider>()
+                                    .toggleFavorite(code),
+                                onLongPress: () =>
+                                    _showLongPressInfo(course),
+                              );
+                            },
+                          )
+                        : GridView.builder(
+                            padding: const EdgeInsets.all(12),
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: columns,
+                              crossAxisSpacing: 12,
+                              mainAxisSpacing: 12,
+                              childAspectRatio: 1.5,
+                            ),
+                            itemCount: courses.length,
+                            itemBuilder: (context, index) {
+                              final course =
+                                  courses[index] as Map<String, dynamic>;
+                              final code = course['code'] as String;
+                              return CourseCard(
+                                course: course,
+                                isFavorite:
+                                    courseProvider.isFavorite(code),
+                                onTap: () => _openDetail(course),
+                                onFavoriteTap: () => context
+                                    .read<CourseProvider>()
+                                    .toggleFavorite(code),
+                                onLongPress: () =>
+                                    _showLongPressInfo(course),
+                              );
+                            },
+                          ),
+                  ),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(8),
+                    color: Colors.pink.shade50,
+                    child: Text(
+                      '${courseProvider.favorites.length} course di-favorite',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: Colors.pink,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
                       ),
-                    ],
-                  );
-                },
+                    ),
+                  ),
+                ],
               );
             },
           );

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class CourseState extends ChangeNotifier {
+class CourseProvider extends ChangeNotifier {
   final Set<String> favorites = {};
 
   void toggleFavorite(String code) {
