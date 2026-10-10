@@ -11,7 +11,9 @@ const String studentId = '2415051089';
 void main() {
   runApp(
     ChangeNotifierProvider(
-      create: (_) => CourseProvider(),
+      create: (_) => CourseProvider(
+        CourseRepository(CourseService()),
+      )..loadCourses(),
       child: const MyApp(),
     ),
   );
@@ -269,24 +271,10 @@ class HomeTab extends StatelessWidget {
   }
 }
 
-class CoursesTab extends StatefulWidget {
+class CoursesTab extends StatelessWidget {
   const CoursesTab({super.key});
 
-  @override
-  State<CoursesTab> createState() => _CoursesTabState();
-}
-
-class _CoursesTabState extends State<CoursesTab> {
-  late Future<List<Course>> coursesFuture;
-  final CourseRepository repository = CourseRepository(CourseService());
-
-  @override
-  void initState() {
-    super.initState();
-    coursesFuture = repository.getCourses();
-  }
-
-  void _showLongPressInfo(Course course) {
+  void _showLongPressInfo(BuildContext context, Course course) {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -304,7 +292,7 @@ class _CoursesTabState extends State<CoursesTab> {
     );
   }
 
-  void _openDetail(Course course) async {
+  void _openDetail(BuildContext context, Course course) async {
     final result = await Navigator.push<bool>(
       context,
       MaterialPageRoute(
@@ -312,8 +300,7 @@ class _CoursesTabState extends State<CoursesTab> {
       ),
     );
 
-    if (result == true) {
-      if (!mounted) return;
+    if (result == true && context.mounted) {
       context.read<CourseProvider>().toggleFavorite(course.code);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -329,117 +316,118 @@ class _CoursesTabState extends State<CoursesTab> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Course Explorer')),
-      body: FutureBuilder<List<Course>>(
-        future: coursesFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return Center(child: Text('Gagal memuat data: ${snapshot.error}'));
-          }
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final courseProvider = context.watch<CourseProvider>();
+          final bool isCompact = constraints.maxWidth < 600;
+          final bool isExpanded = constraints.maxWidth >= 840;
+          final int columns = isCompact ? 1 : (isExpanded ? 3 : 2);
 
-          final courses = snapshot.data!;
+          return Column(
+            children: [
+              const IdentityHeader(),
 
-          return LayoutBuilder(
-            builder: (context, constraints) {
-              final bool isCompact = constraints.maxWidth < 600;
-              final bool isExpanded = constraints.maxWidth >= 840;
-              final int columns = isCompact ? 1 : (isExpanded ? 3 : 2);
-
-              final courseProvider = context.watch<CourseProvider>();
-
-              return Column(
-                children: [
-                  const IdentityHeader(),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 8),
-                    child: Row(
-                      children: [
-                        Text(
-                          'Total: ${courses.length} course',
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                        const Spacer(),
-                        Text(
-                          'Favorite: ${courseProvider.favorites.length}',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Colors.pink,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
+              if (courseProvider.isLoading)
+                const Expanded(
+                  child: Center(child: CircularProgressIndicator()),
+                )
+              else if (courseProvider.error != null)
+                Expanded(
+                  child: Center(
+                    child: Text(
+                      'Gagal memuat data: ${courseProvider.error}',
+                      textAlign: TextAlign.center,
                     ),
                   ),
-                  Expanded(
-                    child: isCompact
-                        ? ListView.builder(
-                            padding: const EdgeInsets.symmetric(vertical: 6),
-                            itemCount: courses.length,
-                            itemBuilder: (context, index) {
-                              final course = courses[index];
-                              return CourseCard(
-                                course: course,
-                                isFavorite:
-                                    courseProvider.isFavorite(course.code),
-                                onTap: () => _openDetail(course),
-                                onFavoriteTap: () => context
-                                    .read<CourseProvider>()
-                                    .toggleFavorite(course.code),
-                                onLongPress: () =>
-                                    _showLongPressInfo(course),
-                              );
-                            },
-                          )
-                        : GridView.builder(
-                            padding: const EdgeInsets.all(12),
-                            gridDelegate:
-                                SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: columns,
-                              crossAxisSpacing: 12,
-                              mainAxisSpacing: 12,
-                              childAspectRatio: 1.5,
-                            ),
-                            itemCount: courses.length,
-                            itemBuilder: (context, index) {
-                              final course = courses[index];
-                              return CourseCard(
-                                course: course,
-                                isFavorite:
-                                    courseProvider.isFavorite(course.code),
-                                onTap: () => _openDetail(course),
-                                onFavoriteTap: () => context
-                                    .read<CourseProvider>()
-                                    .toggleFavorite(course.code),
-                                onLongPress: () =>
-                                    _showLongPressInfo(course),
-                              );
-                            },
-                          ),
+                )
+              else ...[
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  child: Row(
+                    children: [
+                      Text(
+                        'Total: ${courseProvider.courses.length} course',
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                      const Spacer(),
+                      Text(
+                        'Favorite: ${courseProvider.favorites.length}',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.pink,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(8),
-                    color: Colors.pink.shade50,
-                    child: Consumer<CourseProvider>(
-                      builder: (context, provider, child) {
-                        return Text(
-                          '${provider.favorites.length} course di-favorite',
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: Colors.pink,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
+                ),
+                Expanded(
+                  child: isCompact
+                      ? ListView.builder(
+                          padding: const EdgeInsets.symmetric(vertical: 6),
+                          itemCount: courseProvider.courses.length,
+                          itemBuilder: (context, index) {
+                            final course = courseProvider.courses[index];
+                            return CourseCard(
+                              course: course,
+                              isFavorite:
+                                  courseProvider.isFavorite(course.code),
+                              onTap: () => _openDetail(context, course),
+                              onFavoriteTap: () => context
+                                  .read<CourseProvider>()
+                                  .toggleFavorite(course.code),
+                              onLongPress: () =>
+                                  _showLongPressInfo(context, course),
+                            );
+                          },
+                        )
+                      : GridView.builder(
+                          padding: const EdgeInsets.all(12),
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: columns,
+                            crossAxisSpacing: 12,
+                            mainAxisSpacing: 12,
+                            childAspectRatio: 1.5,
                           ),
-                        );
-                      },
-                    ),
+                          itemCount: courseProvider.courses.length,
+                          itemBuilder: (context, index) {
+                            final course = courseProvider.courses[index];
+                            return CourseCard(
+                              course: course,
+                              isFavorite:
+                                  courseProvider.isFavorite(course.code),
+                              onTap: () => _openDetail(context, course),
+                              onFavoriteTap: () => context
+                                  .read<CourseProvider>()
+                                  .toggleFavorite(course.code),
+                              onLongPress: () =>
+                                  _showLongPressInfo(context, course),
+                            );
+                          },
+                        ),
+                ),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(8),
+                  color: Colors.pink.shade50,
+                  child: Consumer<CourseProvider>(
+                    builder: (context, provider, child) {
+                      return Text(
+                        '${provider.favorites.length} course di-favorite',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: Colors.pink,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      );
+                    },
                   ),
-                ],
-              );
-            },
+                ),
+              ],
+            ],
           );
         },
       ),
