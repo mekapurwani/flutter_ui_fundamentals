@@ -118,7 +118,7 @@ class IdentityHeader extends StatelessWidget {
   }
 }
 
-// ===== CourseCard (STATEFUL dengan _showDetail) =====
+// ===== CourseCard =====
 class CourseCard extends StatefulWidget {
   final Map<String, dynamic> course;
   final bool isFavorite;
@@ -272,7 +272,7 @@ class HomeTab extends StatelessWidget {
   }
 }
 
-// ===== CoursesTab (dengan prop drilling demo) =====
+// ===== CoursesTab (dengan ValueNotifier demo) =====
 class CoursesTab extends StatefulWidget {
   const CoursesTab({super.key});
 
@@ -280,15 +280,23 @@ class CoursesTab extends StatefulWidget {
   State<CoursesTab> createState() => _CoursesTabState();
 }
 
-// Single Source of Truth
 class _CoursesTabState extends State<CoursesTab> {
   late Future<Map<String, dynamic>> studentFuture;
   final Set<String> favorites = {};
+
+  final ValueNotifier<int> demoCounter = ValueNotifier<int>(0);
+  
 
   @override
   void initState() {
     super.initState();
     studentFuture = loadStudentData();
+  }
+
+  @override
+  void dispose() {
+    demoCounter.dispose();
+    super.dispose();
   }
 
   void _toggleFavorite(String code) {
@@ -369,7 +377,59 @@ class _CoursesTabState extends State<CoursesTab> {
                 children: [
                   const IdentityHeader(),
 
-                  // ===== PROP DRILLING DEMO: Ringkasan Total & Favorite =====
+                  // ===== TAHAP 4: Demo ValueNotifier =====
+                  Container(
+                    margin: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.purple.shade50,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.purple.shade200),
+                    ),
+                    child: Column(
+                      children: [
+                        const Text(
+                          'Demo ValueNotifier',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.purple,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        ValueListenableBuilder<int>(
+                          valueListenable: demoCounter,
+                          builder: (context, value, child) {
+                            return Text(
+                              'Counter: $value',
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            ElevatedButton(
+                              onPressed: () => demoCounter.value--,
+                              child: const Icon(Icons.remove),
+                            ),
+                            const SizedBox(width: 8),
+                            ElevatedButton(
+                              onPressed: () => demoCounter.value++,
+                              child: const Icon(Icons.add),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  // ===== END TAHAP 4 =====
+
+                  // Row ringkasan favorites
                   Padding(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 12, vertical: 8),
@@ -391,7 +451,6 @@ class _CoursesTabState extends State<CoursesTab> {
                       ],
                     ),
                   ),
-                  // ===== END PROP DRILLING DEMO =====
 
                   Expanded(
                     child: isCompact
