@@ -433,14 +433,18 @@ class _CoursesTabState extends State<CoursesTab> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(8),
                     color: Colors.pink.shade50,
-                    child: Text(
-                      '${courseProvider.favorites.length} course di-favorite',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: Colors.pink,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                      ),
+                    child: Consumer<CourseProvider>(
+                      builder: (context, provider, child) {
+                        return Text(
+                          '${provider.favorites.length} course di-favorite',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: Colors.pink,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        );
+                      },
                     ),
                   ),
                 ],
