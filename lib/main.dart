@@ -280,6 +280,7 @@ class CoursesTab extends StatefulWidget {
   State<CoursesTab> createState() => _CoursesTabState();
 }
 
+// Single Source of Truth
 class _CoursesTabState extends State<CoursesTab> {
   late Future<Map<String, dynamic>> studentFuture;
   final Set<String> favorites = {};
