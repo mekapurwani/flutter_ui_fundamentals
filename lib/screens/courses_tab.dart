@@ -50,7 +50,7 @@ class CoursesTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Course Explorer')),
+      appBar: AppBar(title: const Text('Course Explorer v2')),
       body: LayoutBuilder(
         builder: (context, constraints) {
           final courseProvider = context.watch<CourseProvider>();
@@ -75,27 +75,64 @@ class CoursesTab extends StatelessWidget {
                   ),
                 )
               else ...[
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  child: Row(
-                    children: [
-                      Text(
-                        'Total: ${courseProvider.courses.length} course',
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                      const Spacer(),
-                      Text(
-                        'Favorite: ${courseProvider.favorites.length}',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.pink,
-                          fontWeight: FontWeight.bold,
+                              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Courses',
+                                style: TextStyle(fontSize: 12, color: Colors.black54),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '${courseProvider.courses.length}',
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.blue,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Favorites',
+                                style: TextStyle(fontSize: 12, color: Colors.black54),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '${courseProvider.favorites.length}',
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.pink,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
+              ),
                 Expanded(
                   child: isCompact
                       ? ListView.builder(
