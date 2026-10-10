@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:provider/provider.dart';
+import 'models/course.dart';
 import 'course_state.dart';
 
 const String studentName = 'Ni Luh Meka Purwani';
@@ -125,7 +126,7 @@ class IdentityHeader extends StatelessWidget {
 }
 
 class CourseCard extends StatefulWidget {
-  final Map<String, dynamic> course;
+  final Course course;
   final bool isFavorite;
   final VoidCallback onTap;
   final VoidCallback onFavoriteTap;
@@ -149,7 +150,7 @@ class _CourseCardState extends State<CourseCard> {
 
   @override
   Widget build(BuildContext context) {
-    final status = widget.course['status'] as String;
+    final status = widget.course.status;
     Color statusColor;
     String statusLabel;
 
@@ -182,7 +183,7 @@ class _CourseCardState extends State<CourseCard> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      widget.course['title'] as String,
+                      widget.course.title,
                       style: const TextStyle(
                           fontWeight: FontWeight.bold, fontSize: 14),
                       overflow: TextOverflow.ellipsis,
@@ -201,7 +202,7 @@ class _CourseCardState extends State<CourseCard> {
               ),
               const SizedBox(height: 4),
               Text(
-                '${widget.course['code']} • ${widget.course['credits']} SKS',
+                '${widget.course.code} • ${widget.course.credits} SKS',
                 style: const TextStyle(fontSize: 12, color: Colors.black54),
               ),
               const SizedBox(height: 4),
@@ -229,7 +230,7 @@ class _CourseCardState extends State<CourseCard> {
               if (_showDetail) ...[
                 const Divider(),
                 Text(
-                  'Detail: Course ini membahas ${widget.course['title']}.',
+                  'Detail: Course ini membahas ${widget.course.title}.',
                   style: const TextStyle(fontSize: 11, color: Colors.black54),
                 ),
               ],
@@ -291,13 +292,13 @@ class _CoursesTabState extends State<CoursesTab> {
     studentFuture = loadStudentData();
   }
 
-  void _showLongPressInfo(Map<String, dynamic> course) {
+  void _showLongPressInfo(Course course) {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: Text(course['title'] as String),
+        title: Text(course.title),
         content: Text(
-          'Kode: ${course['code']}\nSKS: ${course['credits']}\nStatus: ${course['status']}',
+          'Kode: ${course.code}\nSKS: ${course.credits}\nStatus: ${course.status}',
         ),
         actions: [
           TextButton(
@@ -309,7 +310,7 @@ class _CoursesTabState extends State<CoursesTab> {
     );
   }
 
-  void _openDetail(Map<String, dynamic> course) async {
+  void _openDetail(Course course) async {
     final result = await Navigator.push<bool>(
       context,
       MaterialPageRoute(
@@ -319,10 +320,10 @@ class _CoursesTabState extends State<CoursesTab> {
 
     if (result == true) {
       if (!mounted) return;
-      context.read<CourseProvider>().toggleFavorite(course['code'] as String);
+      context.read<CourseProvider>().toggleFavorite(course.code);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('"${course['title']}" ditambahkan ke favorite'),
+          content: Text('"${course.title}" ditambahkan ke favorite'),
           backgroundColor: Colors.green,
           duration: const Duration(seconds: 2),
         ),
@@ -345,7 +346,10 @@ class _CoursesTabState extends State<CoursesTab> {
           }
 
           final data = snapshot.data!;
-          final courses = data['courses'] as List<dynamic>;
+          final coursesData = data['courses'] as List<dynamic>;
+          final courses = coursesData
+              .map((e) => Course.fromJson(e as Map<String, dynamic>))
+              .toList();
 
           return LayoutBuilder(
             builder: (context, constraints) {
@@ -385,17 +389,15 @@ class _CoursesTabState extends State<CoursesTab> {
                             padding: const EdgeInsets.symmetric(vertical: 6),
                             itemCount: courses.length,
                             itemBuilder: (context, index) {
-                              final course =
-                                  courses[index] as Map<String, dynamic>;
-                              final code = course['code'] as String;
+                              final course = courses[index];
                               return CourseCard(
                                 course: course,
                                 isFavorite:
-                                    courseProvider.isFavorite(code),
+                                    courseProvider.isFavorite(course.code),
                                 onTap: () => _openDetail(course),
                                 onFavoriteTap: () => context
                                     .read<CourseProvider>()
-                                    .toggleFavorite(code),
+                                    .toggleFavorite(course.code),
                                 onLongPress: () =>
                                     _showLongPressInfo(course),
                               );
@@ -412,17 +414,15 @@ class _CoursesTabState extends State<CoursesTab> {
                             ),
                             itemCount: courses.length,
                             itemBuilder: (context, index) {
-                              final course =
-                                  courses[index] as Map<String, dynamic>;
-                              final code = course['code'] as String;
+                              final course = courses[index];
                               return CourseCard(
                                 course: course,
                                 isFavorite:
-                                    courseProvider.isFavorite(code),
+                                    courseProvider.isFavorite(course.code),
                                 onTap: () => _openDetail(course),
                                 onFavoriteTap: () => context
                                     .read<CourseProvider>()
-                                    .toggleFavorite(code),
+                                    .toggleFavorite(course.code),
                                 onLongPress: () =>
                                     _showLongPressInfo(course),
                               );
@@ -458,13 +458,13 @@ class _CoursesTabState extends State<CoursesTab> {
 }
 
 class CourseDetailPage extends StatelessWidget {
-  final Map<String, dynamic> course;
+  final Course course;
 
   const CourseDetailPage({super.key, required this.course});
 
   @override
   Widget build(BuildContext context) {
-    final status = course['status'] as String;
+    final status = course.status;
     Color statusColor;
     String statusLabel;
 
@@ -495,14 +495,14 @@ class CourseDetailPage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      course['title'] as String,
+                      course.title,
                       style: const TextStyle(
                           fontSize: 22, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 12),
-                    Text('Kode: ${course['code']}'),
+                    Text('Kode: ${course.code}'),
                     const SizedBox(height: 6),
-                    Text('SKS: ${course['credits']}'),
+                    Text('SKS: ${course.credits}'),
                     const SizedBox(height: 6),
                     Text(
                       'Status: $statusLabel',
