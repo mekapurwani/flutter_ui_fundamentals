@@ -1,17 +1,32 @@
-# flutter_ui_fundamentals
+# Course Explorer v2
 
-A new Flutter project.
+ State Management & Mobile Application Architecture.
 
-## Getting Started
+**Nama:** Ni Luh Meka Purwani  
+**NIM:** 2415051089
 
-This project is a starting point for a Flutter application.
+## Struktur Folder
 
-A few resources to get you started if this is your first Flutter project:
+| Folder | Tanggung Jawab |
+|--------|----------------|
+| `models/` | Representasi data (`Course`) dan parsing JSON (`Course.fromJson`) |
+| `services/` | Detail teknis akses data mentah (baca JSON, decode). Tidak mengandung UI. |
+| `repositories/` | Abstraksi sumber data. Menyembunyikan detail Service dari Provider. |
+| `providers/` | State + action (`CourseProvider`). Mengelola loading/error/data. Tidak menyimpan BuildContext. |
+| `screens/` | Halaman UI (Home, Courses, Favorites, Profile, Detail). Murni presentasi, akses data lewat Provider. |
+| `widgets/` | Komponen UI yang reusable (`IdentityHeader`, `CourseCard`). |
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+## Alur Dependency
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+```
+Screen/Widget → Provider → Repository → Service/Data Source
+```
+
+UI tidak memanggil `rootBundle` atau `jsonDecode` secara langsung — semua akses data lewat Provider.
+
+## Cara Menjalankan
+
+```bash
+flutter pub get
+flutter run
+```
