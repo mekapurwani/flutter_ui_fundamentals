@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'course_state.dart';
 
 const String studentName = 'Ni Luh Meka Purwani';
 const String studentId = '2415051089';
@@ -99,7 +100,6 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
   }
 }
 
-// ===== IdentityHeader =====
 class IdentityHeader extends StatelessWidget {
   const IdentityHeader({super.key});
 
@@ -118,7 +118,6 @@ class IdentityHeader extends StatelessWidget {
   }
 }
 
-// ===== CourseCard =====
 class CourseCard extends StatefulWidget {
   final Map<String, dynamic> course;
   final bool isFavorite;
@@ -224,8 +223,7 @@ class _CourseCardState extends State<CourseCard> {
               if (_showDetail) ...[
                 const Divider(),
                 Text(
-                  'Detail: Course ini membahas ${widget.course['title']}. '
-                  'Status saat ini: $statusLabel.',
+                  'Detail: Course ini membahas ${widget.course['title']}.',
                   style: const TextStyle(fontSize: 11, color: Colors.black54),
                 ),
               ],
@@ -237,7 +235,6 @@ class _CourseCardState extends State<CourseCard> {
   }
 }
 
-// ===== HomeTab =====
 class HomeTab extends StatelessWidget {
   const HomeTab({super.key});
 
@@ -272,7 +269,6 @@ class HomeTab extends StatelessWidget {
   }
 }
 
-// ===== CoursesTab (dengan ValueNotifier demo) =====
 class CoursesTab extends StatefulWidget {
   const CoursesTab({super.key});
 
@@ -282,31 +278,12 @@ class CoursesTab extends StatefulWidget {
 
 class _CoursesTabState extends State<CoursesTab> {
   late Future<Map<String, dynamic>> studentFuture;
-  final Set<String> favorites = {};
-
-  final ValueNotifier<int> demoCounter = ValueNotifier<int>(0);
-  
+  final CourseState courseState = CourseState();
 
   @override
   void initState() {
     super.initState();
     studentFuture = loadStudentData();
-  }
-
-  @override
-  void dispose() {
-    demoCounter.dispose();
-    super.dispose();
-  }
-
-  void _toggleFavorite(String code) {
-    setState(() {
-      if (favorites.contains(code)) {
-        favorites.remove(code);
-      } else {
-        favorites.add(code);
-      }
-    });
   }
 
   void _showLongPressInfo(Map<String, dynamic> course) {
@@ -336,9 +313,7 @@ class _CoursesTabState extends State<CoursesTab> {
     );
 
     if (result == true) {
-      setState(() {
-        favorites.add(course['code'] as String);
-      });
+      courseState.toggleFavorite(course['code'] as String);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -373,144 +348,99 @@ class _CoursesTabState extends State<CoursesTab> {
               final bool isExpanded = constraints.maxWidth >= 840;
               final int columns = isCompact ? 1 : (isExpanded ? 3 : 2);
 
-              return Column(
-                children: [
-                  const IdentityHeader(),
-
-                  // ===== TAHAP 4: Demo ValueNotifier =====
-                  Container(
-                    margin: const EdgeInsets.all(12),
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.purple.shade50,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.purple.shade200),
-                    ),
-                    child: Column(
-                      children: [
-                        const Text(
-                          'Demo ValueNotifier',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.purple,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        ValueListenableBuilder<int>(
-                          valueListenable: demoCounter,
-                          builder: (context, value, child) {
-                            return Text(
-                              'Counter: $value',
+              return ListenableBuilder(
+                listenable: courseState,
+                builder: (context, _) {
+                  return Column(
+                    children: [
+                      const IdentityHeader(),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 8),
+                        child: Row(
+                          children: [
+                            Text(
+                              'Total: ${courses.length} course',
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                            const Spacer(),
+                            Text(
+                              'Favorite: ${courseState.favorites.length}',
                               style: const TextStyle(
-                                fontSize: 18,
+                                fontSize: 12,
+                                color: Colors.pink,
                                 fontWeight: FontWeight.bold,
                               ),
-                            );
-                          },
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            ElevatedButton(
-                              onPressed: () => demoCounter.value--,
-                              child: const Icon(Icons.remove),
-                            ),
-                            const SizedBox(width: 8),
-                            ElevatedButton(
-                              onPressed: () => demoCounter.value++,
-                              child: const Icon(Icons.add),
                             ),
                           ],
                         ),
-                      ],
-                    ),
-                  ),
-                  // ===== END TAHAP 4 =====
-
-                  // Row ringkasan favorites
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 8),
-                    child: Row(
-                      children: [
-                        Text(
-                          'Total: ${courses.length} course',
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                        const Spacer(),
-                        Text(
-                          'Favorite: ${favorites.length}',
+                      ),
+                      Expanded(
+                        child: isCompact
+                            ? ListView.builder(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 6),
+                                itemCount: courses.length,
+                                itemBuilder: (context, index) {
+                                  final course =
+                                      courses[index] as Map<String, dynamic>;
+                                  final code = course['code'] as String;
+                                  return CourseCard(
+                                    course: course,
+                                    isFavorite:
+                                        courseState.isFavorite(code),
+                                    onTap: () => _openDetail(course),
+                                    onFavoriteTap: () =>
+                                        courseState.toggleFavorite(code),
+                                    onLongPress: () =>
+                                        _showLongPressInfo(course),
+                                  );
+                                },
+                              )
+                            : GridView.builder(
+                                padding: const EdgeInsets.all(12),
+                                gridDelegate:
+                                    SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: columns,
+                                  crossAxisSpacing: 12,
+                                  mainAxisSpacing: 12,
+                                  childAspectRatio: 1.5,
+                                ),
+                                itemCount: courses.length,
+                                itemBuilder: (context, index) {
+                                  final course =
+                                      courses[index] as Map<String, dynamic>;
+                                  final code = course['code'] as String;
+                                  return CourseCard(
+                                    course: course,
+                                    isFavorite:
+                                        courseState.isFavorite(code),
+                                    onTap: () => _openDetail(course),
+                                    onFavoriteTap: () =>
+                                        courseState.toggleFavorite(code),
+                                    onLongPress: () =>
+                                        _showLongPressInfo(course),
+                                  );
+                                },
+                              ),
+                      ),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(8),
+                        color: Colors.pink.shade50,
+                        child: Text(
+                          '${courseState.favorites.length} course di-favorite',
+                          textAlign: TextAlign.center,
                           style: const TextStyle(
-                            fontSize: 12,
                             color: Colors.pink,
                             fontWeight: FontWeight.bold,
+                            fontSize: 12,
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-
-                  Expanded(
-                    child: isCompact
-                        ? ListView.builder(
-                            padding: const EdgeInsets.symmetric(vertical: 6),
-                            itemCount: courses.length,
-                            itemBuilder: (context, index) {
-                              final course =
-                                  courses[index] as Map<String, dynamic>;
-                              final code = course['code'] as String;
-                              return CourseCard(
-                                course: course,
-                                isFavorite: favorites.contains(code),
-                                onTap: () => _openDetail(course),
-                                onFavoriteTap: () => _toggleFavorite(code),
-                                onLongPress: () =>
-                                    _showLongPressInfo(course),
-                              );
-                            },
-                          )
-                        : GridView.builder(
-                            padding: const EdgeInsets.all(12),
-                            gridDelegate:
-                                SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: columns,
-                              crossAxisSpacing: 12,
-                              mainAxisSpacing: 12,
-                              childAspectRatio: 1.5,
-                            ),
-                            itemCount: courses.length,
-                            itemBuilder: (context, index) {
-                              final course =
-                                  courses[index] as Map<String, dynamic>;
-                              final code = course['code'] as String;
-                              return CourseCard(
-                                course: course,
-                                isFavorite: favorites.contains(code),
-                                onTap: () => _openDetail(course),
-                                onFavoriteTap: () => _toggleFavorite(code),
-                                onLongPress: () =>
-                                    _showLongPressInfo(course),
-                              );
-                            },
-                          ),
-                  ),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(8),
-                    color: Colors.pink.shade50,
-                    child: Text(
-                      '${favorites.length} course di-favorite',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: Colors.pink,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
                       ),
-                    ),
-                  ),
-                ],
+                    ],
+                  );
+                },
               );
             },
           );
@@ -520,7 +450,6 @@ class _CoursesTabState extends State<CoursesTab> {
   }
 }
 
-// ===== Detail Page =====
 class CourseDetailPage extends StatelessWidget {
   final Map<String, dynamic> course;
 
@@ -597,7 +526,6 @@ class CourseDetailPage extends StatelessWidget {
   }
 }
 
-// ===== ProfileTab =====
 class ProfileTab extends StatefulWidget {
   const ProfileTab({super.key});
 
