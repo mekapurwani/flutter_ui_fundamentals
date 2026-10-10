@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'models/course.dart';
 import 'services/course_service.dart';
+import 'repositories/course_repository.dart';
 import 'course_state.dart';
 
 const String studentName = 'Ni Luh Meka Purwani';
@@ -277,12 +278,12 @@ class CoursesTab extends StatefulWidget {
 
 class _CoursesTabState extends State<CoursesTab> {
   late Future<List<Course>> coursesFuture;
-  final CourseService courseService = CourseService();
+  final CourseRepository repository = CourseRepository(CourseService());
 
   @override
   void initState() {
     super.initState();
-    coursesFuture = courseService.loadCourses();
+    coursesFuture = repository.getCourses();
   }
 
   void _showLongPressInfo(Course course) {
