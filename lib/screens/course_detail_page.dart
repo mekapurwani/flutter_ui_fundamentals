@@ -10,6 +10,40 @@ class CourseDetailPage extends StatelessWidget {
 
   const CourseDetailPage({super.key, required this.course});
 
+  Future<void> _hapusCourse(BuildContext context) async {
+    final konfirmasi = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Konfirmasi'),
+        content: Text('Yakin ingin menghapus ${course.title}?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Batal'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Hapus'),
+          ),
+        ],
+      ),
+    );
+
+    if (konfirmasi == true && context.mounted) {
+      final berhasil = await context.read<CourseProvider>().deleteCourse(course);
+      
+      if (berhasil && context.mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Course berhasil dihapus'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final status = course.status;
@@ -43,6 +77,10 @@ class CourseDetailPage extends StatelessWidget {
                 ),
               );
             },
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete, color: Colors.red),
+            onPressed: () => _hapusCourse(context),
           ),
         ],
       ),
