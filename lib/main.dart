@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+import 'models/course.dart';
 import 'services/course_service.dart';
 import 'repositories/course_repository.dart';
 import 'providers/course_provider.dart';
@@ -15,11 +16,12 @@ const String studentId = '2415051089';
 
 const String apiUrl = 'https://course-api-pearl.vercel.app/courses';
 
-Future<List<dynamic>> fetchCourses() async {
+Future<List<Course>> fetchCourses() async {
   final response = await http.get(Uri.parse(apiUrl));
 
   if (response.statusCode == 200) {
-    return jsonDecode(response.body) as List<dynamic>;
+    final List data = jsonDecode(response.body) as List;
+    return data.map((e) => Course.fromJson(e as Map<String, dynamic>)).toList();
   }
 
   throw Exception('HTTP ${response.statusCode}');
@@ -68,6 +70,9 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
     try {
       final courses = await fetchCourses();
       debugPrint('BERHASIL: Mendapatkan ${courses.length} course dari API');
+      for (var i = 0; i < 3; i++) {
+        debugPrint('Course ${i + 1}: ${courses[i].code} - ${courses[i].title} - ${courses[i].status}');
+      }
     } catch (e) {
       debugPrint('GAGAL: $e');
     }
