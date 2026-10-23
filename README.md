@@ -1,50 +1,28 @@
-# Course Explorer v2
+# Course Data Manager
 
- State Management & Mobile Application Architecture.
+Aplikasi Flutter untuk memenuhi tugas Pertemuan 7 - RESTful API, Backend Services & Database Integration.
 
 **Nama:** Ni Luh Meka Purwani  
 **NIM:** 2415051089
 
-## Struktur Folder
+## Deskripsi Aplikasi
+Aplikasi ini merupakan pengembangan dari Course Explorer v2 yang kini terintegrasi langsung dengan database PostgreSQL melalui Supabase. Aplikasi mendukung operasi CRUD (Create, Read, Update, Delete) data course secara real-time.
 
-| Folder | Tanggung Jawab |
-|--------|----------------|
-| `models/` | Representasi data (`Course`) dan parsing JSON (`Course.fromJson`) |
-| `services/` | Detail teknis akses data mentah (baca JSON, decode). Tidak mengandung UI. |
-| `repositories/` | Abstraksi sumber data. Menyembunyikan detail Service dari Provider. |
-| `providers/` | State + action (`CourseProvider`). Mengelola loading/error/data. Tidak menyimpan BuildContext. |
-| `screens/` | Halaman UI (Home, Courses, Favorites, Profile, Detail). Murni presentasi, akses data lewat Provider. |
-| `widgets/` | Komponen UI yang reusable (`IdentityHeader`, `CourseCard`). |
+## Arsitektur Singkat
+Aplikasi ini menggunakan arsitektur berlapis (layered architecture):
+- **UI (Screens/Widgets):** Menangani tampilan dan interaksi pengguna.
+- **State (Provider):** Mengelola state (loading, error, data) dan menghubungkan UI dengan Repository.
+- **Repository:** Abstraksi yang menyembunyikan detail sumber data dari Provider.
+- **Service/Data Source:** Berkomunikasi langsung dengan backend (Supabase / REST API).
 
-## Alur Dependency
+Alur data: `UI -> Provider -> Repository -> CourseSupabaseService -> Supabase (PostgreSQL)`
 
-```
-Screen/Widget → Provider → Repository → Service/Data Source
-```
-
-UI tidak memanggil `rootBundle` atau `jsonDecode` secara langsung — semua akses data lewat Provider.
+## Backend yang Digunakan
+- **Database & API:** Supabase (PostgreSQL).
+- **Tabel:** `courses` (id, code, title, credits, status, created_at).
 
 ## Cara Menjalankan
-
-```bash
-flutter pub get
-flutter run
-```
-
-## REST API Endpoint (Tahap 1)
-
-Endpoint latihan yang digunakan (dari dosen):
-- Base URL: `https://course-api-pearl.vercel.app`
-- Endpoint List: `GET https://course-api-pearl.vercel.app/courses`
-- Status Code: `200 OK`
-- Contoh Field JSON: `id`, `code`, `title`, `credits`, `status`
-
-## Database Schema (Tahap 11)
-
-Tabel: `courses`
-- `id` (bigint, identity, primary key)
-- `code` (text, unique)
-- `title` (text)
-- `credits` (int)
-- `status` (text, check: planned/active/done)
-- `created_at` (timestamp)
+1. Pastikan Flutter SDK sudah terinstal.
+2. Jalankan `flutter pub get` untuk mengunduh dependency.
+3. Hubungkan ke emulator atau perangkat fisik Android.
+4. Jalankan `flutter run`.
