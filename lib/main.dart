@@ -12,13 +12,12 @@ const String studentName = 'Ni Luh Meka Purwani';
 const String studentId = '2415051089';
 
 void main() {
-  final apiBaseUrl = 'https://course-api-pearl.vercel.app';
-  
+  const apiBaseUrl = 'https://course-api-pearl.vercel.app';
+  final repository = CourseRepository(CourseApiService(apiBaseUrl));
+
   runApp(
     ChangeNotifierProvider(
-      create: (_) => CourseProvider(
-        CourseRepository(CourseApiService(apiBaseUrl)),
-      )..loadCourses(),
+      create: (_) => CourseProvider(repository)..loadCourses(),
       child: const MyApp(),
     ),
   );
@@ -77,12 +76,9 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
       labelType: NavigationRailLabelType.all,
       destinations: const [
         NavigationRailDestination(icon: Icon(Icons.home), label: Text('Home')),
-        NavigationRailDestination(
-            icon: Icon(Icons.school), label: Text('Courses')),
-        NavigationRailDestination(
-            icon: Icon(Icons.favorite), label: Text('Favorites')),
-        NavigationRailDestination(
-            icon: Icon(Icons.person), label: Text('Profile')),
+        NavigationRailDestination(icon: Icon(Icons.school), label: Text('Courses')),
+        NavigationRailDestination(icon: Icon(Icons.favorite), label: Text('Favorites')),
+        NavigationRailDestination(icon: Icon(Icons.person), label: Text('Profile')),
       ],
     );
   }
