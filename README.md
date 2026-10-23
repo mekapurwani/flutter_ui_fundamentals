@@ -38,3 +38,13 @@ Endpoint latihan yang digunakan (dari dosen):
 - Endpoint List: `GET https://course-api-pearl.vercel.app/courses`
 - Status Code: `200 OK`
 - Contoh Field JSON: `id`, `code`, `title`, `credits`, `status`
+
+## Database Schema (Tahap 11)
+
+Tabel: `courses`
+- `id` (bigint, identity, primary key)
+- `code` (text, unique)
+- `title` (text)
+- `credits` (int)
+- `status` (text, check: planned/active/done)
+- `created_at` (timestamp)
