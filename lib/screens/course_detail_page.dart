@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../models/course.dart';
 import '../providers/course_provider.dart';
 import '../widgets/identity_header.dart';
+import 'course_form_page.dart';
 
 class CourseDetailPage extends StatelessWidget {
   final Course course;
@@ -29,7 +30,22 @@ class CourseDetailPage extends StatelessWidget {
     final isFavorite = context.watch<CourseProvider>().isFavorite(course.code);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Detail Course')),
+      appBar: AppBar(
+        title: const Text('Detail Course'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.edit),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => CourseFormPage(course: course),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(

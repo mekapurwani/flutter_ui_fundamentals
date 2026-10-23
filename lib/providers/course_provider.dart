@@ -46,6 +46,23 @@ class CourseProvider extends ChangeNotifier {
     }
   }
 
+  Future<bool> updateCourse(Course course) async {
+    isSaving = true;
+    notifyListeners();
+
+    try {
+      await repository.updateCourse(course.id!, course);
+      await loadCourses();
+      return true;
+    } catch (e) {
+      error = e.toString();
+      return false;
+    } finally {
+      isSaving = false;
+      notifyListeners();
+    }
+  }
+
   void toggleFavorite(String code) {
     if (favorites.contains(code)) {
       favorites.remove(code);

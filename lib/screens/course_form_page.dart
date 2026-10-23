@@ -4,7 +4,9 @@ import '../models/course.dart';
 import '../providers/course_provider.dart';
 
 class CourseFormPage extends StatefulWidget {
-  const CourseFormPage({super.key});
+  final Course? course;
+
+  const CourseFormPage({super.key, this.course});
 
   @override
   State<CourseFormPage> createState() => _CourseFormPageState();
@@ -12,10 +14,19 @@ class CourseFormPage extends StatefulWidget {
 
 class _CourseFormPageState extends State<CourseFormPage> {
   final _formKey = GlobalKey<FormState>();
-  final _codeCtrl = TextEditingController();
-  final _titleCtrl = TextEditingController();
-  final _creditsCtrl = TextEditingController();
+  late TextEditingController _codeCtrl;
+  late TextEditingController _titleCtrl;
+  late TextEditingController _creditsCtrl;
   String _status = 'planned';
+
+  @override
+  void initState() {
+    super.initState();
+    _codeCtrl = TextEditingController(text: widget.course?.code ?? '');
+    _titleCtrl = TextEditingController(text: widget.course?.title ?? '');
+    _creditsCtrl = TextEditingController(text: widget.course?.credits.toString() ?? '');
+    _status = widget.course?.status ?? 'planned';
+  }
 
   @override
   void dispose() {
@@ -30,20 +41,28 @@ class _CourseFormPageState extends State<CourseFormPage> {
     FocusScope.of(context).unfocus();
 
     final courseBaru = Course(
+      id: widget.course?.id,
       code: _codeCtrl.text.trim(),
       title: _titleCtrl.text.trim(),
       credits: int.parse(_creditsCtrl.text.trim()),
       status: _status,
     );
 
-    final berhasil = await context.read<CourseProvider>().createCourse(courseBaru);
+    final provider = context.read<CourseProvider>();
+    bool berhasil;
+
+    if (widget.course == null) {
+      berhasil = await provider.createCourse(courseBaru);
+    } else {
+      berhasil = await provider.updateCourse(courseBaru);
+    }
 
     if (!mounted) return;
 
     if (berhasil) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Course berhasil ditambahkan'),
+        SnackBar(
+          content: Text(widget.course == null ? 'Course berhasil ditambahkan' : 'Course berhasil diperbarui'),
           backgroundColor: Colors.green,
         ),
       );
@@ -51,7 +70,7 @@ class _CourseFormPageState extends State<CourseFormPage> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Gagal menambahkan course'),
+          content: Text('Gagal menyimpan course'),
           backgroundColor: Colors.red,
         ),
       );
@@ -63,7 +82,9 @@ class _CourseFormPageState extends State<CourseFormPage> {
     final isSaving = context.watch<CourseProvider>().isSaving;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Tambah Course')),
+      appBar: AppBar(
+        title: Text(widget.course == null ? 'Tambah Course' : 'Edit Course'),
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -73,6 +94,7 @@ class _CourseFormPageState extends State<CourseFormPage> {
             children: [
               TextFormField(
                 controller: _codeCtrl,
+                enabled: widget.course == null,
                 decoration: const InputDecoration(
                   labelText: 'Kode Course',
                   hintText: 'Contoh: MOB06',
