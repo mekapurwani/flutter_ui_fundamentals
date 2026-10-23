@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'services/course_api_service.dart';
+import 'services/course_supabase_service.dart';
 import 'repositories/course_repository.dart';
 import 'providers/course_provider.dart';
 import 'screens/home_tab.dart';
@@ -12,7 +12,7 @@ import 'screens/profile_tab.dart';
 const String studentName = 'Ni Luh Meka Purwani';
 const String studentId = '2415051089';
 
-const String supabaseUrl = 'https://ivqykbodqpuvtlmuavvl.supabase.co/rest/v1/';
+const String supabaseUrl = 'https://ivqykbodqpuvtlmuavvl.supabase.co';
 const String supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml2cXlrYm9kcXB1dnRsbXVhdnZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI3NDUzNzMsImV4cCI6MjEwODMyMTM3M30.OO_ytUQ6DKJK_C34jKCRsTmN_bBgR1wiqOQRNClSYX8';
 
 Future<void> main() async {
@@ -23,8 +23,7 @@ Future<void> main() async {
     publishableKey: supabaseAnonKey,
   );
 
-  const apiBaseUrl = 'https://course-api-pearl.vercel.app';
-  final repository = CourseRepository(CourseApiService(apiBaseUrl));
+  final repository = CourseRepository(CourseSupabaseService());
 
   runApp(
     ChangeNotifierProvider(
