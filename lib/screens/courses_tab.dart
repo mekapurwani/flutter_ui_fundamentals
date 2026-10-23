@@ -6,6 +6,7 @@ import '../widgets/identity_header.dart';
 import '../widgets/course_card.dart';
 import '../widgets/error_view.dart';
 import 'course_detail_page.dart';
+import 'course_form_page.dart';
 
 class CoursesTab extends StatelessWidget {
   const CoursesTab({super.key});
@@ -52,6 +53,15 @@ class CoursesTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Course Explorer')),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const CourseFormPage()),
+          );
+        },
+        child: const Icon(Icons.add),
+      ),
       body: LayoutBuilder(
         builder: (context, constraints) {
           final courseProvider = context.watch<CourseProvider>();
