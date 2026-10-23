@@ -49,19 +49,43 @@ class CoursesTab extends StatelessWidget {
     }
   }
 
+  void _konfirmasiHapus(BuildContext context, Course course) async {
+    final konfirmasi = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Konfirmasi'),
+        content: Text('Yakin ingin menghapus ${course.title}?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Batal'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Hapus'),
+          ),
+        ],
+      ),
+    );
+
+    if (konfirmasi == true && context.mounted) {
+      final berhasil = await context.read<CourseProvider>().deleteCourse(course);
+      
+      if (berhasil && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Course berhasil dihapus'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Course Explorer')),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const CourseFormPage()),
-          );
-        },
-        child: const Icon(Icons.add),
-      ),
+      appBar: AppBar(title: const Text('Course Data Manager')),
       body: LayoutBuilder(
         builder: (context, constraints) {
           final courseProvider = context.watch<CourseProvider>();
@@ -72,6 +96,26 @@ class CoursesTab extends StatelessWidget {
           return Column(
             children: [
               const IdentityHeader(),
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const CourseFormPage()),
+                      );
+                    },
+                    icon: const Icon(Icons.add),
+                    label: const Text('Tambah Course'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green.shade100,
+                      foregroundColor: Colors.green.shade800,
+                    ),
+                  ),
+                ),
+              ),
               
               if (courseProvider.isLoading)
                 const Expanded(
@@ -91,64 +135,6 @@ class CoursesTab extends StatelessWidget {
                   ),
                 )
               else ...[
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Card(
-                          child: Padding(
-                            padding: const EdgeInsets.all(12),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  'Courses',
-                                  style: TextStyle(fontSize: 12, color: Colors.black54),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  '${courseProvider.courses.length}',
-                                  style: const TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.blue,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Card(
-                          child: Padding(
-                            padding: const EdgeInsets.all(12),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  'Favorites',
-                                  style: TextStyle(fontSize: 12, color: Colors.black54),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  '${courseProvider.favorites.length}',
-                                  style: const TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.pink,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
                 Expanded(
                   child: isCompact
                       ? ListView.builder(
@@ -164,6 +150,15 @@ class CoursesTab extends StatelessWidget {
                                   .read<CourseProvider>()
                                   .toggleFavorite(course.code),
                               onLongPress: () => _showLongPressInfo(context, course),
+                              onEdit: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => CourseFormPage(course: course),
+                                  ),
+                                );
+                              },
+                              onDelete: () => _konfirmasiHapus(context, course),
                             );
                           },
                         )
@@ -186,6 +181,15 @@ class CoursesTab extends StatelessWidget {
                                   .read<CourseProvider>()
                                   .toggleFavorite(course.code),
                               onLongPress: () => _showLongPressInfo(context, course),
+                              onEdit: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => CourseFormPage(course: course),
+                                  ),
+                                );
+                              },
+                              onDelete: () => _konfirmasiHapus(context, course),
                             );
                           },
                         ),

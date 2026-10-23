@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import '../widgets/identity_header.dart';
+
+const String studentName = 'Ni Luh Meka Purwani';
+const String studentId = '2415051089';
 
 class HomeTab extends StatelessWidget {
   const HomeTab({super.key});
@@ -7,7 +9,7 @@ class HomeTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Course Explorer v2')),
+      appBar: AppBar(title: const Text('Course Data Manager')),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -17,7 +19,7 @@ class HomeTab extends StatelessWidget {
               const Icon(Icons.school, size: 80, color: Colors.blue),
               const SizedBox(height: 16),
               const Text(
-                'Selamat datang di Course Explorer',
+                'Selamat datang di Course Data Manager',
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),

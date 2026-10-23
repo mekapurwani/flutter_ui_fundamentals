@@ -4,9 +4,45 @@ import '../providers/course_provider.dart';
 import '../widgets/identity_header.dart';
 import '../widgets/course_card.dart';
 import 'course_detail_page.dart';
+import 'course_form_page.dart';
 
 class FavoritesPage extends StatelessWidget {
   const FavoritesPage({super.key});
+
+  void _konfirmasiHapus(BuildContext context, String title, int id) async {
+    final konfirmasi = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Konfirmasi'),
+        content: Text('Yakin ingin menghapus $title?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Batal'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Hapus'),
+          ),
+        ],
+      ),
+    );
+
+    if (konfirmasi == true && context.mounted) {
+      final provider = context.read<CourseProvider>();
+      final course = provider.courses.firstWhere((c) => c.id == id);
+      final berhasil = await provider.deleteCourse(course);
+
+      if (berhasil && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Course berhasil dihapus'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,8 +76,7 @@ class FavoritesPage extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) =>
-                                  CourseDetailPage(course: course),
+                              builder: (_) => CourseDetailPage(course: course),
                             ),
                           );
                         },
@@ -51,6 +86,19 @@ class FavoritesPage extends StatelessWidget {
                               .toggleFavorite(course.code);
                         },
                         onLongPress: () {},
+                        onEdit: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => CourseFormPage(course: course),
+                            ),
+                          );
+                        },
+                        onDelete: () => _konfirmasiHapus(
+                          context,
+                          course.title,
+                          course.id!,
+                        ),
                       );
                     },
                   ),

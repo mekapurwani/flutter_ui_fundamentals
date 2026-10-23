@@ -7,6 +7,8 @@ class CourseCard extends StatefulWidget {
   final VoidCallback onTap;
   final VoidCallback onFavoriteTap;
   final VoidCallback onLongPress;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
 
   const CourseCard({
     super.key,
@@ -15,6 +17,8 @@ class CourseCard extends StatefulWidget {
     required this.onTap,
     required this.onFavoriteTap,
     required this.onLongPress,
+    required this.onEdit,
+    required this.onDelete,
   });
 
   @override
@@ -73,6 +77,14 @@ class _CourseCardState extends State<CourseCard> {
                       color: widget.isFavorite ? Colors.pink : Colors.grey,
                     ),
                     onPressed: widget.onFavoriteTap,
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.edit, color: Colors.blue),
+                    onPressed: widget.onEdit,
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close, color: Colors.red),
+                    onPressed: widget.onDelete,
                   ),
                 ],
               ),

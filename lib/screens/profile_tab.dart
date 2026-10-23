@@ -74,7 +74,7 @@ class _ProfileTabState extends State<ProfileTab> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Course Explorer v2')),
+      appBar: AppBar(title: const Text('Course Data Manager')), // <-- Ini diubah
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
