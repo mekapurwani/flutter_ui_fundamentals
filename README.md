@@ -30,3 +30,11 @@ UI tidak memanggil `rootBundle` atau `jsonDecode` secara langsung — semua akse
 flutter pub get
 flutter run
 ```
+
+## REST API Endpoint (Tahap 1)
+
+Endpoint latihan yang digunakan (dari dosen):
+- Base URL: `https://course-api-pearl.vercel.app`
+- Endpoint List: `GET https://course-api-pearl.vercel.app/courses`
+- Status Code: `200 OK`
+- Contoh Field JSON: `id`, `code`, `title`, `credits`, `status`
