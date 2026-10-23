@@ -4,6 +4,7 @@ import '../models/course.dart';
 import '../providers/course_provider.dart';
 import '../widgets/identity_header.dart';
 import '../widgets/course_card.dart';
+import '../widgets/error_view.dart';
 import 'course_detail_page.dart';
 
 class CoursesTab extends StatelessWidget {
@@ -50,7 +51,7 @@ class CoursesTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Course Explorer v2')),
+      appBar: AppBar(title: const Text('Course Explorer')),
       body: LayoutBuilder(
         builder: (context, constraints) {
           final courseProvider = context.watch<CourseProvider>();
@@ -61,78 +62,83 @@ class CoursesTab extends StatelessWidget {
           return Column(
             children: [
               const IdentityHeader(),
+              
               if (courseProvider.isLoading)
                 const Expanded(
                   child: Center(child: CircularProgressIndicator()),
                 )
               else if (courseProvider.error != null)
                 Expanded(
+                  child: ErrorView(
+                    message: 'Gagal memuat data: ${courseProvider.error}',
+                    onRetry: () => courseProvider.loadCourses(),
+                  ),
+                )
+              else if (courseProvider.courses.isEmpty)
+                const Expanded(
                   child: Center(
-                    child: Text(
-                      'Gagal memuat data: ${courseProvider.error}',
-                      textAlign: TextAlign.center,
-                    ),
+                    child: Text('Data course belum tersedia'),
                   ),
                 )
               else ...[
-                              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(12),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'Courses',
-                                style: TextStyle(fontSize: 12, color: Colors.black54),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                '${courseProvider.courses.length}',
-                                style: const TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.blue,
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Card(
+                          child: Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Courses',
+                                  style: TextStyle(fontSize: 12, color: Colors.black54),
                                 ),
-                              ),
-                            ],
+                                const SizedBox(height: 4),
+                                Text(
+                                  '${courseProvider.courses.length}',
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.blue,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(12),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'Favorites',
-                                style: TextStyle(fontSize: 12, color: Colors.black54),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                '${courseProvider.favorites.length}',
-                                style: const TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.pink,
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Card(
+                          child: Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Favorites',
+                                  style: TextStyle(fontSize: 12, color: Colors.black54),
                                 ),
-                              ),
-                            ],
+                                const SizedBox(height: 4),
+                                Text(
+                                  '${courseProvider.favorites.length}',
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.pink,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
                 Expanded(
                   child: isCompact
                       ? ListView.builder(
@@ -142,21 +148,18 @@ class CoursesTab extends StatelessWidget {
                             final course = courseProvider.courses[index];
                             return CourseCard(
                               course: course,
-                              isFavorite:
-                                  courseProvider.isFavorite(course.code),
+                              isFavorite: courseProvider.isFavorite(course.code),
                               onTap: () => _openDetail(context, course),
                               onFavoriteTap: () => context
                                   .read<CourseProvider>()
                                   .toggleFavorite(course.code),
-                              onLongPress: () =>
-                                  _showLongPressInfo(context, course),
+                              onLongPress: () => _showLongPressInfo(context, course),
                             );
                           },
                         )
                       : GridView.builder(
                           padding: const EdgeInsets.all(12),
-                          gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
+                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: columns,
                             crossAxisSpacing: 12,
                             mainAxisSpacing: 12,
@@ -167,14 +170,12 @@ class CoursesTab extends StatelessWidget {
                             final course = courseProvider.courses[index];
                             return CourseCard(
                               course: course,
-                              isFavorite:
-                                  courseProvider.isFavorite(course.code),
+                              isFavorite: courseProvider.isFavorite(course.code),
                               onTap: () => _openDetail(context, course),
                               onFavoriteTap: () => context
                                   .read<CourseProvider>()
                                   .toggleFavorite(course.code),
-                              onLongPress: () =>
-                                  _showLongPressInfo(context, course),
+                              onLongPress: () => _showLongPressInfo(context, course),
                             );
                           },
                         ),
